@@ -1,1608 +1,1679 @@
 <!DOCTYPE html>
-<html lang="zh-TW">
-  <head>
-    <base target="_top">
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>露比專案管理系統</title>
+<html>
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>露比專案管理系統</title>
+
+  <!-- ====== 瀏覽器分頁圖示 (Favicon) ====== -->
+  <link rel="icon" type="image/png" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+  <link rel="shortcut icon" type="image/png" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+
+  <!-- ====== App Icon 與主畫面設定 ====== -->
+  <meta name="apple-mobile-web-app-title" content="露比設計">
+  <meta name="application-name" content="露比設計">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+  <!-- iOS Apple 設備專用 Icon -->
+  <link rel="apple-touch-icon" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+  <link rel="apple-touch-icon" sizes="152x152" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+  <link rel="apple-touch-icon" sizes="180x180" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+  <link rel="apple-touch-icon" sizes="167x167" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+
+  <!-- Android Chrome 設備專用 Icon -->
+  <link rel="icon" type="image/png" sizes="192x192" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+  <link rel="icon" type="image/png" sizes="512x512" href="https://drive.google.com/uc?export=view&id=1BQfcrTIFiSpntNeQbsjr_T2oUYgGeGRx&v=2">
+
+  <style>
+    :root {
+      --bg-color: #ffffff; --text-main: #1d1d1f; --text-muted: #86868b;
+      --border-color: #e5e5ea; --accent-color: #1d1d1f; --hover-bg: #f5f5f7;
+      --input-bg: #ffffff;
+    }
+
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: var(--bg-color); color: var(--text-main); display: flex; -webkit-font-smoothing: antialiased; line-height: 1.5; }
+
+    /* ====== 導覽與基礎版面 ====== */
+    .sidebar { width: 260px; height: 100vh; position: fixed; left: 0; top: 0; background-color: var(--bg-color); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; z-index: 1000; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+    .brand-title { padding: 40px 24px 30px; font-size: 18px; font-weight: 600; letter-spacing: 0.5px; }
+    .nav-item { padding: 16px 24px; font-size: 15px; color: var(--text-muted); cursor: pointer; transition: 0.2s; }
+    .nav-item:hover { background-color: var(--hover-bg); color: var(--text-main); }
+    .nav-item.active { color: var(--text-main); font-weight: 600; background-color: var(--hover-bg); border-right: 3px solid var(--accent-color); }
     
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+TC:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://unpkg.com/lucide@latest"></script>
+    .mobile-header { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 60px; background-color: rgba(255, 255, 255, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border-color); z-index: 999; align-items: center; padding: 0 20px; box-sizing: border-box; }
+    .hamburger-btn { background: none; border: none; cursor: pointer; padding: 10px; display: flex; flex-direction: column; gap: 5px; }
+    .hamburger-line { width: 20px; height: 2px; background-color: var(--text-main); border-radius: 2px; }
+    .mobile-title { margin-left: 15px; font-weight: 600; font-size: 16px; }
+    .overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.3); z-index: 998; opacity: 0; transition: 0.3s; }
 
-    <style>
-      :root {
-        --bg-main: #FFFFFF;
-        --bg-card: #FAFAFA;
-        --text-main: #111111;
-        --text-secondary: #666666;
-        --text-muted: #999999;
-        --border-light: #E5E5E5;
-        --border-dark: #111111;
-        --spacing-sm: 8px;
-        --spacing-md: 16px;
-        --spacing-lg: 24px;
-        --color-accent: #ea580c; 
-      }
+    .main-content { margin-left: 260px; padding: 60px 80px; width: calc(100% - 260px); box-sizing: border-box; min-height: 100vh; position: relative;}
+    .page { display: none; animation: fadeIn 0.4s ease; }
+    .page.active { display: block; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-      *, *::before, *::after {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-      }
+    /* ====== 元件設計 ====== */
+    .segmented-control { display: flex; background: var(--hover-bg); border-radius: 10px; padding: 4px; margin-bottom: 30px; width: fit-content; }
+    .segment-btn { padding: 8px 24px; font-size: 14px; font-weight: 500; cursor: pointer; border-radius: 8px; color: var(--text-muted); transition: all 0.2s ease; border: none; background: transparent; }
+    .segment-btn.active { background: var(--bg-color); color: var(--text-main); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
 
-      body {
-        font-family: 'Inter', 'Noto Sans TC', sans-serif;
-        background-color: var(--bg-main);
-        color: var(--text-main);
-        font-size: 14px;
-        line-height: 1.6;
-        -webkit-font-smoothing: antialiased;
-        -moz-osx-font-smoothing: grayscale;
-      }
-
-      h1 { font-size: 22px; line-height: 1.4; font-weight: 600; letter-spacing: -0.01em; color: var(--text-main); margin-bottom: var(--spacing-md); }
-      h2 { font-size: 16px; line-height: 1.5; font-weight: 600; color: var(--text-main); margin-bottom: var(--spacing-sm); }
-      h3 { font-size: 14px; line-height: 1.5; font-weight: 600; color: var(--text-main); margin-bottom: var(--spacing-sm); }
-
-      input, textarea, select, button { font-family: inherit; font-size: 14px; line-height: 1.6; color: var(--text-main); }
-      .caption { font-size: 12px; line-height: 1.5; color: var(--text-secondary); }
-
-      .btn-primary {
-        background: #111111; color: #FFFFFF; border: none; border-radius: 8px; height: 44px; padding: 0 16px;
-        font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: opacity 0.2s ease;
-      }
-      .btn-primary:hover { opacity: 0.8; }
-      .btn-primary:disabled { background: var(--text-muted); cursor: not-allowed; }
-
-      .btn-secondary {
-        background: #FFFFFF; color: #111111; border: 1px solid #111111; border-radius: 8px; height: 44px; padding: 0 16px;
-        font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: background-color 0.2s ease;
-      }
-      .btn-secondary:hover { background-color: #FAFAFA; }
-
-      .btn-icon {
-        background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 8px; 
-        width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
-        cursor: pointer; color: var(--text-main); transition: all 0.2s ease;
-      }
-      .btn-icon:hover { background: var(--bg-card); border-color: var(--text-main); }
-      .btn-icon.success { background: #FFFFFF; color: #111111; border-color: var(--border-light); }
-      .btn-icon.success:hover { background: #22c55e; color: #FFFFFF; border-color: #22c55e; }
-      .btn-icon.success.active { background: #22c55e; color: #FFFFFF; border-color: #22c55e; }
-      .btn-icon.danger { background: #FFFFFF; color: var(--text-muted); border-color: transparent; }
-      .btn-icon.danger:hover { background: #fee2e2; color: #ef4444; }
-      .btn-icon.ghost { background: transparent; border-color: transparent; color: var(--text-muted); width: 28px; height: 28px; }
-      .btn-icon.ghost:hover { background: var(--bg-card); color: var(--text-main); }
-
-      .input-field {
-        background: #FFFFFF; border: 1px solid #E5E5E5; height: 44px; border-radius: 8px; padding: 0 12px;
-        outline: none; width: 100%; transition: border-color 0.2s ease;
-      }
-      .input-field:focus { border: 1px solid #111111; }
-      textarea.input-field { height: auto; min-height: 80px; padding: 12px; resize: vertical; }
-
-      .card-mono { background: #FAFAFA; border: 1px solid #E5E5E5; border-radius: 8px; padding: 16px; transition: all 0.3s ease; }
-
-      .badge-mono {
-        background: #111111; color: #FFFFFF; border-radius: 4px; padding: 2px 8px; font-size: 12px;
-        display: inline-flex; align-items: center; white-space: nowrap;
-      }
-      .badge-mono.outline { background: transparent; color: #111111; border: 1px solid #111111; }
-
-      .divider { height: 1px; background-color: var(--border-light); margin: var(--spacing-md) 0; width: 100%; border: none; }
-
-      .popover {
-        position: absolute; background: var(--bg-main); border: 1px solid var(--border-dark); border-radius: 8px;
-        padding: var(--spacing-md); box-shadow: 0 4px 12px rgba(0,0,0,0.15); z-index: 1100;
-        display: none; width: 280px; max-height: 300px; overflow-y: auto;
-      }
-      .popover.active { display: block; }
-      .timeline-item { border-left: 2px solid var(--border-dark); padding-left: 12px; margin-bottom: 12px; position: relative; }
-      .timeline-item::before {
-        content: ''; position: absolute; left: -5px; top: 2px; width: 8px; height: 8px;
-        border-radius: 50%; background: var(--text-main);
-      }
-
-      .skeleton-box { background-color: var(--border-light); border-radius: 4px; animation: skeletonPulse 1.5s ease-in-out infinite; }
-      .skeleton-circle { background-color: var(--border-light); border-radius: 50%; animation: skeletonPulse 1.5s ease-in-out infinite; }
-      @keyframes skeletonPulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-      .accordion-item { background: var(--bg-main); border: 1px solid var(--border-light); border-radius: 8px; margin-bottom: var(--spacing-sm); overflow: hidden; transition: border-color 0.2s ease; }
-      .accordion-header { padding: var(--spacing-md); cursor: pointer; display: flex; flex-direction: column; gap: 8px; background: var(--bg-main); transition: background-color 0.2s ease; }
-      .accordion-header:hover { background: var(--bg-card); }
-      .accordion-body { display: none; padding: var(--spacing-md); border-top: 1px solid var(--border-light); background: var(--bg-card); animation: fadeIn 0.3s ease; }
-      .progress-bar-bg { flex: 1; height: 6px; background-color: var(--border-light); border-radius: 3px; overflow: hidden; }
-      .progress-bar-fill { height: 100%; background-color: var(--text-main); transition: width 0.3s ease; }
-
-      #app-header, #app-content { 
-        width: 100%; max-width: 800px; margin: 0 auto; padding: var(--spacing-lg) var(--spacing-md); 
-      }
-      .navbar { display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-md); padding-bottom: var(--spacing-sm); border-bottom: 1px solid var(--border-light); }
-      .navbar h2 { margin: 0; }
-
-      #top-nav {
-        display: flex; justify-content: flex-start; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
-      }
-      .nav-item {
-        display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 8px 16px; 
-        background: #FFFFFF; border: 1px solid var(--border-light); border-radius: 8px; 
-        color: var(--text-secondary); cursor: pointer; transition: all 0.2s ease; font-weight: 500; font-size: 13px;
-      }
-      .nav-item.active {
-        background: #111111; color: #FFFFFF; border-color: #111111;
-      }
-      .nav-item i { width: 16px; height: 16px; }
-
-      .view-section { display: none; animation: fadeIn 0.3s ease; }
-      .view-section.active { display: block; }
-      @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-
-      .draggable-task { transition: border-top 0.2s ease, opacity 0.2s ease; }
-      .draggable-task.dragging { opacity: 0.4; }
-      .inline-action-panel { animation: fadeIn 0.3s ease; }
-
-      .quote-iframe { width: 100%; height: 350px; border: 1px solid var(--border-light); border-radius: 8px; background: #fff; }
-    </style>
-  </head>
-  <body>
+    .header-action-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+    .section-title { font-size: 24px; font-weight: 600; margin: 0; letter-spacing: -0.5px;}
     
-    <header id="app-header">
-      <div class="navbar">
-        <i data-lucide="folder-kanban" style="width: 24px; height: 24px;"></i>
-        <h2>露比專案管理系統</h2>
+    .draft-controls { display: flex; gap: 10px; align-items: center; }
+    .draft-select { width: 180px; padding: 10px 12px; font-size: 13px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--bg-color); cursor: pointer; outline: none; transition: 0.2s; }
+    .draft-select:focus { border-color: var(--text-main); }
+    .draft-btn, .secondary-sm { padding: 10px 16px; font-size: 13px; border-radius: 8px; background: var(--hover-bg); border: 1px solid var(--border-color); color: var(--text-main); cursor: pointer; font-weight: 500; transition: 0.2s;}
+    .draft-btn:hover, .secondary-sm:hover { background: #e8e8ed; }
+    .draft-status { font-size: 12px; color: var(--text-muted); opacity: 0; transition: opacity 0.3s; }
+
+    .card { border: 1px solid var(--border-color); border-radius: 16px; padding: 32px; margin-bottom: 24px; background: var(--bg-color); position: relative; box-shadow: 0 4px 20px rgba(0,0,0,0.015);}
+    .card-title { font-size: 18px; font-weight: 600; margin-bottom: 24px; margin-top: 0; padding-bottom: 12px; letter-spacing: -0.3px;}
+
+    label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; margin-top: 20px; font-weight: 500;}
+    input[type="text"], input[type="number"], input[type="tel"], input[type="email"], input[type="date"], select, textarea { width: 100%; padding: 14px 16px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 10px; background-color: var(--input-bg); color: var(--text-main); box-sizing: border-box; transition: all 0.2s ease; outline: none; font-family: inherit; }
+    input:focus, select:focus, textarea:focus { border-color: var(--text-main); box-shadow: 0 0 0 4px rgba(29, 29, 31, 0.05); }
+    
+    button.primary { background-color: var(--text-main); color: #ffffff; border: none; border-radius: 10px; padding: 16px 24px; font-size: 15px; font-weight: 500; cursor: pointer; transition: 0.2s; width: 100%; margin-top: 24px; }
+    button.primary:active { transform: scale(0.98); background-color: #000000; }
+    button.secondary { background-color: var(--hover-bg); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 10px; padding: 16px 24px; font-size: 15px; width: 100%; cursor: pointer; margin-top: 8px; font-weight: 500; transition: 0.2s;}
+    button.secondary:hover { background-color: #e8e8ed; }
+
+    /* ====== 歷史紀錄表格 ====== */
+    .history-table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .history-table th { text-align: left; padding: 16px 12px; border-bottom: 1px solid var(--border-color); color: var(--text-muted); font-size: 13px; font-weight: 500; }
+    .history-table td { padding: 20px 12px; border-bottom: 1px solid var(--hover-bg); font-size: 14px; color: var(--text-main); vertical-align: middle; }
+    .history-table tr:last-child td { border-bottom: none; }
+    .link-btn { color: #0066cc; text-decoration: none; font-weight: 500; transition: 0.2s; }
+    .link-btn:hover { text-decoration: underline; }
+    
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 3000; justify-content: center; align-items: center; opacity: 0; transition: 0.3s;}
+    .modal-overlay.show { display: flex; opacity: 1; }
+    .modal-content { background: var(--bg-color); width: 90%; max-width: 800px; max-height: 85vh; border-radius: 20px; display: flex; flex-direction: column; box-shadow: 0 20px 40px rgba(0,0,0,0.15); transform: translateY(20px); transition: 0.3s;}
+    .modal-overlay.show .modal-content { transform: translateY(0); }
+    .modal-header { padding: 24px 32px; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; }
+    .modal-header h2 { margin: 0; font-size: 18px; font-weight: 600; letter-spacing: -0.3px;}
+    .close-btn { background: none; border: none; font-size: 24px; cursor: pointer; color: var(--text-muted); transition: 0.2s; padding: 0;}
+    .close-btn:hover { color: var(--text-main); }
+    .modal-body { padding: 32px; overflow-y: auto; flex: 1; font-size: 14px; line-height: 1.8; color: var(--text-main); }
+    .modal-footer { padding: 24px 32px; border-top: 1px solid var(--border-color); background: var(--hover-bg); border-radius: 0 0 20px 20px; display: flex; gap: 15px; }
+
+    /* ====== 摺疊清單 ====== */
+    .category-title { font-size: 14px; font-weight: 600; color: var(--text-muted); margin: 32px 0 16px 0; border-bottom: 1px solid var(--hover-bg); padding-bottom: 8px;}
+    details.accordion-group { margin-bottom: 12px; border: 1px solid var(--border-color); border-radius: 12px; background: var(--bg-color); transition: all 0.3s ease;}
+    summary.accordion-header { padding: 18px 20px; font-size: 15px; font-weight: 600; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; outline: none; }
+    summary.accordion-header::-webkit-details-marker { display: none; }
+    .summary-left { display: flex; align-items: center; }
+    .summary-right::after { content: '+'; font-size: 22px; color: var(--text-muted); font-weight: 300; line-height: 1; transition: 0.3s; margin-top: -2px;}
+    details.accordion-group[open] .summary-right::after { transform: rotate(45deg); display: inline-block;}
+    .details-content { padding: 0 20px 24px 48px; border-top: 1px solid var(--hover-bg); margin-top: 4px; padding-top: 20px; }
+
+    .tree-child { margin-bottom: 16px; font-size: 14px; display: flex; align-items: flex-start; color: var(--text-main); font-weight: 400;}
+    input[type="checkbox"] { appearance: none; width: 20px; height: 20px; border: 1px solid var(--border-color); border-radius: 6px; margin-right: 14px; cursor: pointer; position: relative; outline: none; background: var(--input-bg); transition: 0.2s; flex-shrink: 0; margin-top: 2px;}
+    input[type="checkbox"]:checked { background-color: var(--text-main); border-color: var(--text-main); }
+    input[type="checkbox"]:checked::after { content: ''; position: absolute; left: 6px; top: 2px; width: 5px; height: 10px; border: solid white; border-width: 0 2px 2px 0; transform: rotate(45deg); }
+
+    .price-display { font-size: 28px; font-weight: 600; margin-top: 20px; border-top: 1px solid var(--border-color); padding-top: 20px; letter-spacing: -0.5px;}
+
+    /* ====== 專案篩選與標籤設計 ====== */
+    .search-filter-container { margin-bottom: 24px; }
+    .search-bar { width: 100%; padding: 14px 20px; font-size: 15px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--hover-bg); transition: 0.2s; outline: none; box-sizing: border-box;}
+    .search-bar:focus { background: var(--bg-color); border-color: var(--text-main); box-shadow: 0 0 0 4px rgba(29, 29, 31, 0.05);}
+    
+    .toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 4000; display: flex; flex-direction: column; gap: 10px; pointer-events: none;}
+    .toast { background: rgba(29, 29, 31, 0.95); color: white; padding: 14px 28px; border-radius: 30px; font-size: 14px; backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); animation: slideDown 0.3s; font-weight: 500; letter-spacing: 0.5px;}
+
+    @media (max-width: 768px) {
+      .sidebar { transform: translateX(-100%); } .sidebar.open { transform: translateX(0); }
+      .mobile-header { display: flex; } 
+      .main-content { margin-left: 0; width: 100%; padding: 80px 20px 40px; }
+      .header-action-row { flex-direction: column; align-items: flex-start; gap: 16px; margin-bottom: 20px;}
+      .draft-controls { width: 100%; flex-wrap: wrap; }
+      .draft-select, .draft-btn, .secondary-sm { flex: 1; text-align: center; justify-content: center;}
+      .segmented-control { width: 100%; display: flex; margin-bottom: 24px; padding: 6px;}
+      .segment-btn { flex: 1; text-align: center; padding: 12px 8px; }
+      .search-filter-container { display: flex !important; flex-direction: column; gap: 12px !important; align-items: stretch !important; margin-bottom: 24px !important; }
+      .search-filter-container .search-bar, .search-filter-container select, .search-filter-container button { width: 100% !important; margin: 0 !important; max-width: none !important;}
+      .card { padding: 20px; border-radius: 12px; }
+
+      .history-table { display: block; }
+      .history-table thead { display: none; }
+      .history-table tbody { display: block; width: 100%; }
+      .history-table tr { display: flex; flex-direction: column; margin-bottom: 20px; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: var(--bg-color); box-shadow: 0 2px 10px rgba(0,0,0,0.03); }
+      .history-table td { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--hover-bg); text-align: right; }
+      .history-table td::before { content: attr(data-label); font-weight: 500; color: var(--text-muted); text-align: left; margin-right: 15px; flex-shrink: 0; }
+      .history-table tr td:last-child { border-bottom: none; margin-top: 12px; padding-top: 16px; padding-bottom: 0; border-top: 1px solid var(--hover-bg); justify-content: flex-end; gap: 10px; flex-wrap: wrap; }
+      .history-table tr td:last-child::before { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="toast-container" id="toast-container"></div>
+  <div class="mobile-header">
+    <button class="hamburger-btn" onclick="toggleSidebar()"><div class="hamburger-line"></div><div class="hamburger-line"></div><div class="hamburger-line"></div></button>
+    <div class="mobile-title">專案管理系統</div>
+  </div>
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+  <div class="sidebar" id="sidebar">
+    <div class="brand-title">露比設計</div>
+    <div class="nav-item active" onclick="switchPage('setup', this)">簽約項目設置</div>
+    <div class="nav-item" onclick="switchPage('client', this)">客戶建檔報價</div>
+    <div class="nav-item" onclick="switchPage('external', this)">專案追蹤管理</div>
+  </div>
+
+  <div class="main-content">
+    
+    <div id="page-setup" class="page active">
+      <div class="header-action-row"><div class="section-title">簽約項目設置</div></div>
+      <div class="card">
+        <h3 class="card-title">現有服務管理</h3>
+        <p style="color: var(--text-muted); font-size: 14px; margin-top:-10px;">點擊展開項目編輯，變更會即時呈現，後端默默更新。</p>
+        <div id="existing-services-container"><p style="font-size: 14px; color: var(--text-muted);">資料讀取中...</p></div>
       </div>
-    </header>
-    
-    <main id="app-content" style="padding-top: 0;">
-      
-      <nav id="top-nav">
-        <button class="nav-item active" onclick="switchView('accordion', this)"><i data-lucide="list-todo"></i><span>專案手風琴</span></button>
-        <button class="nav-item" onclick="switchView('fishbone', this)"><i data-lucide="git-commit"></i><span>魚骨進度</span></button>
-        <button class="nav-item" onclick="switchView('email', this)"><i data-lucide="mail"></i><span>Email</span></button>
-      </nav>
-
-      <div id="view-accordion" class="view-section active">
+      <div class="card" id="setup-form-area">
+        <h3 class="card-title">新增服務項目</h3>
+        <label>服務類型</label><select id="setup-type"><option value="單次服務">單次服務</option><option value="訂閱服務">訂閱服務</option><option value="顧問服務">顧問服務</option></select>
+        <label>服務項目名稱</label><input type="text" id="setup-service" placeholder="輸入名稱" oninput="autoSaveSetup()">
+        <label>報價細項 (最多15項)</label><textarea id="setup-details" rows="5" placeholder="每行輸入一個細項" oninput="autoSaveSetup()"></textarea>
         
-        <div class="card-mono" style="margin-bottom: 24px;">
-          <h3 style="display:flex; align-items:center; gap:8px;"><i data-lucide="cpu" style="width:18px;"></i> 將報價單轉為專案 (產出魚骨圖節點)</h3>
-          <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
-             <select id="quote-select" class="input-field">
-                <option value="">請選擇未轉換之客戶報價單...</option>
-             </select>
-             <div style="display:flex; gap:8px;">
-               <select id="quote-type-select" class="input-field" style="width:140px;">
-                  <option value="專案-單次服務">單次專案</option>
-                  <option value="專案-訂閱服務">訂閱專案</option>
-               </select>
-               <button id="btn-generate-project" class="btn-primary" style="flex:1;" onclick="handleGenerateProject()">
-                 <i data-lucide="sparkles" style="width:16px;height:16px;"></i> 產出魚骨圖節點與任務
-               </button>
-             </div>
-          </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <h2>已建檔專案追蹤總覽</h2>
-            <p class="caption">今日需執行任務專案已自動置頂，請點擊展開查看報價細節</p>
-          </div>
-        </div>
-        <div id="accordion-controls" style="display: flex; gap: var(--spacing-md); margin-top: var(--spacing-md); margin-bottom: var(--spacing-md); flex-wrap: wrap;">
-          <div style="flex: 1; min-width: 200px; position: relative;">
-            <i data-lucide="search" style="position: absolute; left: 12px; top: 12px; width: 20px; height: 20px; color: var(--text-muted);"></i>
-            <input type="text" id="search-project-input" class="input-field" placeholder="搜尋專案編號或客戶名稱..." style="padding-left: 40px;" oninput="filterAndRenderProjects()">
-          </div>
-          <select id="filter-status-select" class="input-field" style="width: 160px;" onchange="filterAndRenderProjects()">
-            <option value="all">全部狀態</option>
-            <option value="未排入">未排入</option>
-            <option value="已排入">已排入</option>
-          </select>
-        </div>
-        <div id="accordion-container"></div>
-      </div>
-
-      <div id="view-fishbone" class="view-section">
-        
-        <div class="card-mono" style="margin-bottom: 24px;">
-           <label style="font-weight:600; font-size:14px; margin-bottom:8px; display:block;">1. 選擇專案檢視魚骨圖與排程</label>
-           <select id="project-select-fishbone" class="input-field" onchange="handleFishboneProjectChange(this.value)">
-              <option value="">請選擇已建立之專案...</option>
-           </select>
-           
-           <div id="fishbone-project-info" style="margin-top:12px; display:none; padding:12px; background:#fff; border-radius:8px; border:1px solid var(--border-light);"></div>
-           
-           <hr class="divider" style="margin: 16px 0;" />
-           
-           <label style="font-weight:600; font-size:14px; margin-bottom:8px; display:block;">2. 進行日曆排程與狀態同步</label>
-           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-             <input type="date" id="start-date-input" class="input-field" style="width:140px;">
-             <button id="btn-auto-schedule" class="btn-primary" onclick="handleAutoScheduleClick()">
-                <i data-lucide="calendar-plus" style="width:16px;height:16px;"></i> 自動排程
-             </button>
-             <button id="btn-refresh-schedule" class="btn-secondary" onclick="handleRefreshScheduleClick()">
-                <i data-lucide="refresh-cw" style="width:16px; height:16px;"></i> 刷新未來排程
-             </button>
-             <button id="btn-clear-schedule" class="btn-secondary" style="color: #ef4444; border-color: #ef4444;" onclick="handleClearScheduleClick()">
-                <i data-lucide="trash-2" style="width:16px; height:16px;"></i> 清除未來排程
-             </button>
-           </div>
-        </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
-          <div>
-            <h2>魚骨進度追蹤圖</h2>
-            <p class="caption">點擊節點查看細項任務與工時紀錄</p>
-          </div>
-          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
-            <button class="btn-secondary" onclick="toggleAddCustomNodeInline()">
-              <i data-lucide="plus" style="width:16px; height:16px;"></i> 新增自訂節點
-            </button>
-          </div>
+        <div style="display:flex; gap:12px; margin-top:20px;">
+          <div style="flex:1;"><label style="margin-top:0;">未稅報價 (若是訂閱制請填每月金額)</label><input type="number" id="setup-price" placeholder="輸入金額" oninput="autoSaveSetup()"></div>
+          <div style="flex:1;"><label style="margin-top:0;">預設月份數 (單次請填 1)</label><input type="number" id="setup-months" value="1" oninput="autoSaveSetup()"></div>
         </div>
         
-        <div id="inline-add-node-form" class="card-mono inline-action-panel" style="display: none; margin-bottom: 16px; border: 1px solid var(--text-main);">
-          <div style="display:flex; flex-direction:column; gap: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center;">
-              <h3 style="margin:0;"><i data-lucide="plus-circle" style="width:16px; height:16px; vertical-align:middle; margin-right:4px;"></i> 新增客製化細項任務</h3>
-              <i data-lucide="x" style="width:16px; height:16px; cursor:pointer;" onclick="toggleAddCustomNodeInline()"></i>
-            </div>
-            <div><label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;">工作節點</label>
-            <input type="text" id="custom-node-name" class="input-field" placeholder="例如：特別審查會議"></div>
-            <div><label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;">細項任務名稱</label>
-            <input type="text" id="custom-task-name" class="input-field" placeholder="例如：準備審查簡報"></div>
-            <div style="display:flex; gap:16px; flex-wrap:wrap;">
-              <div style="flex:1; min-width:140px;"><label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;">預計執行日期</label>
-              <input type="date" id="custom-node-date" class="input-field"></div>
-              <div style="flex:1; min-width:140px;"><label style="display:block; font-size:13px; font-weight:600; margin-bottom:4px;">預估工時 (hr)</label>
-              <input type="number" id="custom-node-duration" class="input-field" placeholder="0.5" step="0.25" min="0.25"></div>
-            </div>
-            <div style="margin-top: 8px; text-align: right;">
-              <button class="btn-primary" id="btn-submit-custom-node" onclick="submitCustomNode()"><i data-lucide="save" style="width:16px;height:16px;"></i> 儲存並排入日曆</button>
-            </div>
-          </div>
-        </div>
-
-        <div id="fishbone-svg-container" style="overflow-x: auto; overflow-y: hidden; padding: 24px; min-height: 360px; border: 1px solid var(--border-light); border-radius: 8px; background: var(--bg-card); text-align: center;">
-        </div>
-        <div id="fishbone-detail-container" style="margin-top: 24px;"></div>
+        <label style="margin-top: 24px; font-weight: 500; color: var(--text-main);">約定條款</label>
+        <button class="secondary" onclick="generateSetupAI_Terms()" style="margin-bottom: 12px;">使用 AI 策略師生成專屬條款</button>
+        <textarea id="setup-terms" rows="6" placeholder="由 AI 生成或手動輸入約定條款" oninput="autoSaveSetup()"></textarea>
+        <button class="primary" onclick="saveSetup()">確認新增</button>
       </div>
-
-      <div id="view-email" class="view-section">
-        <h2>Email 發送與歸檔中心</h2>
-        <p class="caption">點擊欄位自動記憶歷史常用選項</p>
-        
-        <div class="card-mono" style="margin-top: 16px;">
-          <div style="display: flex; flex-direction: column; gap: 12px;">
-            <div>
-              <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">收件人 Email</label>
-              <input type="text" id="email-to" class="input-field" placeholder="example@gmail.com" autocomplete="off">
-            </div>
-            <div>
-              <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">信件主旨</label>
-              <input type="text" id="email-subject" class="input-field" placeholder="請輸入主旨" autocomplete="off">
-            </div>
-            <div>
-              <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">信件內容</label>
-              <textarea id="email-body" class="input-field" style="min-height: 120px;" placeholder="請輸入信件正文..." autocomplete="off"></textarea>
-            </div>
-            <div>
-              <label style="font-size: 13px; font-weight: 600; margin-bottom: 4px; display: block;">附件上傳 (最多 10 個，將歸檔至 Drive)</label>
-              <input type="file" id="email-files" class="input-field" multiple style="padding: 8px;">
-            </div>
-            <div style="text-align: right; margin-top: 8px;">
-              <button id="btn-submit-email" class="btn-primary" onclick="handleEmailSubmit()">
-                <i data-lucide="send" style="width:16px; height:16px;"></i> 發送並歸檔
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <h3 style="margin-top: 32px;">近期發送紀錄</h3>
-        <div id="email-history-container" style="display: flex; flex-direction: column; gap: 12px;">
-           <p class="caption">暫無新增紀錄</p>
-        </div>
-      </div>
-    </main>
-    
-    <div id="history-popover" class="popover">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;">
-        <h3 style="margin:0; font-size: 14px;">歷史紀錄時間軸</h3>
-        <i data-lucide="x" style="width:16px; height:16px; cursor:pointer;" onclick="closeHistoryPopover()"></i>
-      </div>
-      <div id="history-popover-content"></div>
     </div>
 
-    <div id="toast-container"></div>
-    
-    <script>
-      const GAS_WEB_URL = "https://script.google.com/macros/s/AKfycbzBLeJRI3XmKkuFeSDERWedCEFhTAf8H6ILHpDBEwbPdEcQ5eeGTNwTcw4WFXvqPala-g/exec"; 
+    <div id="page-client" class="page">
+      <div class="header-action-row"><div class="section-title">客戶建檔與報價</div></div>
+      <div class="segmented-control">
+        <button class="segment-btn active" id="btn-tab-new" onclick="switchClientTab('new')">建立新報價單</button>
+        <button class="segment-btn" id="btn-tab-history" onclick="switchClientTab('history')">歷史報價紀錄</button>
+      </div>
 
-      const OfflineQueueManager = {
-        queueKey: 'ruby_offline_queue',
-        enqueue: function(action, payload) {
-          let queue = this.getQueue();
-          queue.push({ id: Date.now(), action, payload });
-          try {
-            localStorage.setItem(this.queueKey, JSON.stringify(queue));
-            console.log("[OfflineQueue] 已加入離線佇列", action);
-          } catch (e) {
-            showToast("本地暫存空間不足，部分離線操作可能無法保存", "error");
-          }
-        },
-        getQueue: function() {
-          try { return JSON.parse(localStorage.getItem(this.queueKey)) || []; }
-          catch(e) { return []; }
-        },
-        setQueue: function(queue) {
-          localStorage.setItem(this.queueKey, JSON.stringify(queue));
-        },
-        processQueue: async function() {
-          let queue = this.getQueue();
-          if (queue.length === 0) return;
-          showToast(`正在背景同步 ${queue.length} 筆離線操作...`, "info");
-          let newQueue = [];
-          for (let item of queue) {
-            try {
-              await apiClient.directCall(item.action, item.payload);
-            } catch (e) {
-              newQueue.push(item);
-            }
-          }
-          this.setQueue(newQueue);
-          if (newQueue.length === 0) showToast("離線操作已全數同步完成！", "info");
-          else showToast(`尚有 ${newQueue.length} 筆操作同步失敗`, "error");
-        }
-      };
-
-      window.addEventListener('online', () => {
-        showToast("網路已恢復連線，開始同步離線資料", "info");
-        OfflineQueueManager.processQueue();
-      });
-      window.addEventListener('offline', () => {
-        showToast("網路已斷線，您的操作將自動暫存於本地端", "error");
-      });
-
-      const apiClient = {
-        call: async function(action, payload = {}) {
-          const mutativeActions = ['executeAutoSchedule', 'updateSubTaskLog', 'addCustomNode', 'sendEmailWithAttachments', 'updateTaskSchedule', 'toggleTaskStatus', 'deleteTask', 'editLog', 'deleteLog', 'updateTaskOrder', 'batchUpdateTaskSchedule', 'refreshSchedule', 'clearFutureSchedule', 'createProjectFromQuote', 'deleteProjectFromSheet'];
-          if (!navigator.onLine && mutativeActions.includes(action)) {
-            OfflineQueueManager.enqueue(action, payload);
-            return { message: "已轉入離線佇列，連線後將自動同步" };
-          }
-          return this.directCall(action, payload);
-        },
-        directCall: async function(action, payload = {}) {
-          if (typeof google !== 'undefined' && google.script && google.script.run) {
-            return new Promise((resolve, reject) => {
-              google.script.run
-                .withSuccessHandler(resStr => {
-                  try {
-                    const parsed = typeof resStr === 'string' ? JSON.parse(resStr) : resStr;
-                    if (parsed.status === 'success') resolve(parsed.data);
-                    else reject(parsed.message || 'GAS 執行發生預期外錯誤');
-                  } catch(e) { reject('回傳資料解析失敗'); }
-                })
-                .withFailureHandler(err => reject(err))
-                .gasDirectCall(action, payload); 
-            });
-          } else {
-            try {
-              const url = new URL(GAS_WEB_URL);
-              const response = await fetch(url.toString(), {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                body: JSON.stringify({ action: action, payload: payload })
-              });
-              const res = await response.json();
-              if (res.status === 'success') return res.data;
-              else throw new Error(res.message || 'Fetch API 執行失敗');
-            } catch (error) { throw error; }
-          }
-        }
-      };
-
-      function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        container.style.cssText = 'position: fixed; top: 24px; right: 24px; z-index: 9999; display: flex; flex-direction: column; align-items: flex-end;';
-        const toast = document.createElement('div');
-        toast.className = `toast-message toast-${type}`;
-        const bgColor = type === 'error' ? '#ff4d4f' : '#111111';
-        toast.style.cssText = `background: ${bgColor}; color: #ffffff; padding: 12px 24px; border-radius: 8px; margin-top: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-size: 14px; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;`;
-        toast.innerText = message;
-        container.appendChild(toast);
-        requestAnimationFrame(() => { toast.style.opacity = '1'; toast.style.transform = 'translateY(0)'; });
-        setTimeout(() => { toast.style.opacity = '0'; toast.style.transform = 'translateY(-10px)'; setTimeout(() => toast.remove(), 300); }, 3000);
-      }
-
-      function switchView(viewId, btnElement) {
-        document.querySelectorAll('.nav-item').forEach(btn => btn.classList.remove('active'));
-        if (btnElement) btnElement.classList.add('active');
-        document.querySelectorAll('.view-section').forEach(view => view.classList.remove('active'));
-        const targetView = document.getElementById(`view-${viewId}`);
-        if (targetView) targetView.classList.add('active');
-        if (viewId === 'fishbone') renderFishboneDiagram();
-      }
-
-      function renderSkeletonLoader(containerId, type = 'accordion') {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        let html = '';
-        if (type === 'accordion') {
-          for (let i = 0; i < 3; i++) {
-            html += `
-              <div class="accordion-item" style="padding: 16px;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                  <div class="skeleton-box" style="width:50%; height:20px;"></div>
-                  <div class="skeleton-box" style="width:60px; height:20px; border-radius:12px;"></div>
-                </div>
-                <div class="skeleton-box" style="width:30%; height:14px; margin-bottom:12px;"></div>
-                <div class="skeleton-box" style="width:100%; height:6px; border-radius:3px;"></div>
-              </div>`;
-          }
-        } else if (type === 'fishbone') {
-          html = `
-            <svg width="450" height="120" xmlns="http://www.w3.org/2000/svg">
-              <line x1="20" y1="60" x2="430" y2="60" stroke="#E5E5E5" stroke-width="2" />
-              <circle cx="70" cy="60" r="18" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="2" class="skeleton-circle" />
-              <circle cx="210" cy="60" r="18" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="2" class="skeleton-circle" />
-              <circle cx="350" cy="60" r="18" fill="#FAFAFA" stroke="#E5E5E5" stroke-width="2" class="skeleton-circle" />
-            </svg>`;
-        }
-        container.innerHTML = html;
-      }
-
-      function renderEmptyState(containerId, iconName, message) {
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        container.innerHTML = `
-          <div style="text-align:center; padding: 48px 24px; color: var(--text-muted); border: 1px dashed var(--border-light); border-radius: 8px; display: flex; flex-direction: column; align-items: center; gap: 12px;">
-            <i data-lucide="${iconName}" style="width: 48px; height: 48px; color: var(--border-light);"></i>
-            <p>${message}</p>
-          </div>`;
-        lucide.createIcons();
-      }
-
-      async function performOptimisticUpdate(localUpdateFn, remoteApiFn, rollbackFn) {
-        try { localUpdateFn(); } catch (e) {}
-        try { await remoteApiFn(); } catch (e) {
-          rollbackFn(); showToast("系統同步失敗，已恢復原狀態", "error");
-        }
-      }
-
-      const EventHub = {
-        events: {},
-        on: function(eventName, callback) { if (!this.events[eventName]) this.events[eventName] = []; this.events[eventName].push(callback); },
-        emit: function(eventName, data) { if (this.events[eventName]) this.events[eventName].forEach(callback => callback(data)); }
-      };
-
-      const StateStore = {
-        state: { projectsList: [], serviceCatalog: [], contractItems: [], calendarEvents: [], activeProjectId: null, emailMenu: {}, pendingQuotes: [] },
-        saveToLocalStorage: function() { try { localStorage.setItem("ruby_pm_state", JSON.stringify(this.state)); } catch (e) {} },
-        loadFromLocalStorage: function() { try { const cached = localStorage.getItem("ruby_pm_state"); if (cached) { this.state = JSON.parse(cached); EventHub.emit("stateLoadedFromCache", this.state); } } catch (e) {} },
-        setInitialData: function(data) {
-          this.state.projectsList = data.projectsList || []; 
-          this.state.serviceCatalog = data.serviceCatalog || [];
-          this.state.contractItems = data.contractItems || []; 
-          this.state.calendarEvents = data.calendarEvents || [];
-          this.state.emailMenu = data.emailHistoryMenu || {};
-          this.state.pendingQuotes = data.pendingQuotes || [];
-          this.saveToLocalStorage(); EventHub.emit("initialDataLoaded", this.state);
-        },
-        set: function(key, value) { this.state[key] = value; this.saveToLocalStorage(); EventHub.emit("stateUpdated:" + key, value); },
-        get: function(key) { return this.state[key]; }
-      };
-
-      function initHeaderUI() {
-        const pSelectEl = document.getElementById("project-select-fishbone");
-        const qSelectEl = document.getElementById("quote-select");
-        document.getElementById("start-date-input").value = new Date().toISOString().split('T')[0];
-
-        EventHub.on("initialDataLoaded", (state) => {
-          if (pSelectEl) {
-             pSelectEl.innerHTML = '<option value="">請選擇已建立之專案...</option>';
-             state.projectsList.forEach(project => {
-               const opt = document.createElement("option"); opt.value = project.projectId;
-               opt.textContent = `[${project.projectId}] ${project.companyName || project.clientName}`;
-               pSelectEl.appendChild(opt);
-             });
-             if (state.activeProjectId) { 
-                 pSelectEl.value = state.activeProjectId; 
-                 handleFishboneProjectChange(state.activeProjectId); 
-             }
-          }
-
-          if (qSelectEl) {
-             qSelectEl.innerHTML = '<option value="">請選擇未轉換之客戶報價單...</option>';
-             state.pendingQuotes.forEach(q => {
-                const opt = document.createElement("option"); opt.value = q.quoteId;
-                opt.textContent = `[${q.quoteId}] ${q.clientName}`;
-                qSelectEl.appendChild(opt);
-             });
-          }
-        });
-      }
-
-      function handleFishboneProjectChange(val) {
-          StateStore.set("activeProjectId", val);
-          const infoDiv = document.getElementById("fishbone-project-info");
-          if (!val) { infoDiv.style.display = "none"; renderFishboneDiagram(); return; }
-          
-          const project = StateStore.get("projectsList").find(p => p.projectId === val);
-          if(project) {
-              infoDiv.innerHTML = `
-                  <div style="font-size:14px; display:flex; gap:16px; flex-wrap:wrap; align-items:center;">
-                      <span class="badge-mono" style="font-size:14px;">${project.projectId}</span>
-                      <span style="font-weight:700; font-size:16px;">${project.companyName || project.clientName}</span>
-                      <span style="color:var(--text-muted);"><i data-lucide="user" style="width:14px;"></i> 客戶ID: ${project.clientId || 'N/A'}</span>
-                  </div>
-              `;
-              infoDiv.style.display = "block";
-              lucide.createIcons();
-              renderFishboneDiagram();
-          }
-      }
-
-      function getEmbedUrl(url) {
-         if(!url) return "";
-         if(url.includes("docs.google.com") && url.includes("/edit")) {
-             return url.replace(/\/edit.*/, "/preview");
-         }
-         return url;
-      }
-
-      async function handleGenerateProject() {
-         const quoteId = document.getElementById("quote-select").value;
-         const sheetType = document.getElementById("quote-type-select").value;
-         if(!quoteId) return showToast("請先選擇一張報價單", "error");
-
-         const btn = document.getElementById("btn-generate-project");
-         btn.disabled = true; 
-         btn.innerHTML = `<i data-lucide="loader" style="width:16px;height:16px; animation: spin 1s linear infinite;"></i> 產出中...`; lucide.createIcons();
-
-         try {
-            const result = await apiClient.call('createProjectFromQuote', { quoteId, sheetType });
-            showToast(result.message || "專案與魚骨圖產出成功！請切換至魚骨進度頁面進行排程。", "info");
-            const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData);
-         } catch(e) {
-            showToast("產出失敗：" + e.toString(), "error");
-         } finally {
-            btn.disabled = false; btn.innerHTML = `<i data-lucide="sparkles" style="width:16px;height:16px;"></i> 產出魚骨圖節點與任務`; lucide.createIcons();
-         }
-      }
-
-      async function handleDeleteProject(projectId, sheetType, rowId) {
-         if(!confirm(`確定要徹底刪除專案 [${projectId}] 的追蹤紀錄嗎？\n注意：這只會刪除專案表的追蹤資料，報價單母檔仍會保留。`)) return;
-         
-         showToast("正在刪除專案...", "info");
-         try {
-            await apiClient.call('deleteProjectFromSheet', { projectId, sheetType });
-            showToast("專案刪除成功！", "info");
-            StateStore.set("activeProjectId", null);
-            const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData);
-         } catch(e) {
-            showToast("刪除失敗：" + e.toString(), "error");
-         }
-      }
-
-      const styleSheet = document.createElement("style"); styleSheet.innerText = `@keyframes spin { 100% { transform: rotate(360deg); } }`; document.head.appendChild(styleSheet);
-
-      async function handleAutoScheduleClick() {
-        const activeProj = StateStore.get("activeProjectId");
-        const startDate = document.getElementById("start-date-input").value;
-        const btn = document.getElementById("btn-auto-schedule");
-
-        if (!activeProj || !startDate) { showToast("請先從上方選擇專案並填寫預計啟動日期！", "error"); return; }
-        
-        btn.disabled = true; 
-        btn.innerHTML = `<i data-lucide="loader" style="width:16px; height:16px; animation: spin 1s linear infinite;"></i> 排程中 (0%)`; 
-        lucide.createIcons();
-
-        let progress = 0;
-        const simInterval = setInterval(() => {
-          progress += Math.floor(Math.random() * 20) + 10; 
-          if (progress > 90) progress = 90;
-          btn.innerHTML = `<i data-lucide="loader" style="width:16px; height:16px; animation: spin 1s linear infinite;"></i> 排程中 (${progress}%)`;
-          lucide.createIcons();
-        }, 500);
-
-        try {
-          const result = await apiClient.call('executeAutoSchedule', { projectId: activeProj, startDate: startDate });
-          clearInterval(simInterval);
-          btn.innerHTML = `<i data-lucide="check" style="width:16px; height:16px;"></i> 排程成功`; 
-          lucide.createIcons();
-          showToast(result.message || "自動排程成功！", "info");
-          const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData);
-        } catch (err) { 
-          clearInterval(simInterval);
-          showToast("排程失敗：" + err.toString(), "error");
-        } finally { 
-          setTimeout(() => {
-            btn.disabled = false; 
-            btn.innerHTML = `<i data-lucide="calendar-plus" style="width:16px; height:16px;"></i> 自動排程`; 
-            lucide.createIcons();
-          }, 2000);
-        }
-      }
-
-      async function handleRefreshScheduleClick() {
-        const activeProj = StateStore.get("activeProjectId");
-        if (!activeProj) return showToast("請先選擇專案", "error");
-        
-        const btn = document.getElementById("btn-refresh-schedule");
-        btn.disabled = true; 
-        btn.innerHTML = `<i data-lucide="loader" style="width:16px; height:16px; animation: spin 1s linear infinite;"></i> 刷新中 (0%)`; 
-        lucide.createIcons();
-        
-        let progress = 0;
-        const simInterval = setInterval(() => {
-          progress += Math.floor(Math.random() * 20) + 10;
-          if (progress > 90) progress = 90;
-          btn.innerHTML = `<i data-lucide="loader" style="width:16px; height:16px; animation: spin 1s linear infinite;"></i> 刷新中 (${progress}%)`;
-          lucide.createIcons();
-        }, 500);
-
-        try {
-          const result = await apiClient.call('refreshSchedule', { projectId: activeProj });
-          clearInterval(simInterval);
-          btn.innerHTML = `<i data-lucide="check" style="width:16px; height:16px;"></i> 刷新成功`; 
-          lucide.createIcons();
-          showToast(result.message || "排程刷新成功！", "info");
-          const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData);
-        } catch(e) {
-          clearInterval(simInterval);
-          showToast("刷新失敗：" + e.toString(), "error");
-        } finally {
-          setTimeout(() => {
-            btn.disabled = false; 
-            btn.innerHTML = `<i data-lucide="refresh-cw" style="width:16px; height:16px;"></i> 刷新未來排程`; 
-            lucide.createIcons();
-          }, 2000);
-        }
-      }
-
-      async function handleClearScheduleClick() {
-        const activeProj = StateStore.get("activeProjectId");
-        if (!activeProj) return showToast("請先選擇專案", "error");
-        
-        if (!confirm("確定要清除 [今日以後] 的所有排程嗎？\n已存在的歷史紀錄將會完美保留，但未來的行程將從日曆中刪除！")) return;
-        
-        const btn = document.getElementById("btn-clear-schedule");
-        btn.disabled = true; 
-        btn.innerHTML = `<i data-lucide="loader" style="width:16px; height:16px; animation: spin 1s linear infinite;"></i> 清除中...`; 
-        lucide.createIcons();
-
-        try {
-          const result = await apiClient.call('clearFutureSchedule', { projectId: activeProj });
-          btn.innerHTML = `<i data-lucide="check" style="width:16px; height:16px;"></i> 清除成功`; 
-          lucide.createIcons();
-          showToast(result.message || "清除成功！", "info");
-          const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData);
-        } catch(e) {
-          showToast("清除失敗：" + e.toString(), "error");
-        } finally {
-          setTimeout(() => {
-            btn.disabled = false; 
-            btn.innerHTML = `<i data-lucide="trash-2" style="width:16px; height:16px;"></i> 清除未來排程`; 
-            lucide.createIcons();
-          }, 2000);
-        }
-      }
-
-      function filterAndRenderProjects() {
-        const searchTerm = document.getElementById('search-project-input').value.toLowerCase().trim();
-        const filterStatus = document.getElementById('filter-status-select').value;
-        const allProjects = StateStore.get('projectsList') || [];
-        const filtered = allProjects.filter(proj => {
-          const matchSearch = proj.projectId.toLowerCase().includes(searchTerm) || proj.clientName.toLowerCase().includes(searchTerm) || (proj.companyName && proj.companyName.toLowerCase().includes(searchTerm));
-          const currentStatus = proj.scheduleStatus || "未排入";
-          let matchStatus = true;
-          if (filterStatus === "未排入") matchStatus = currentStatus.includes("未排入");
-          else if (filterStatus === "已排入") matchStatus = !currentStatus.includes("未排入");
-          return matchSearch && matchStatus;
-        });
-        renderProjectAccordion(filtered);
-      }
-
-      function renderProjectAccordion(filteredProjects = null) {
-        const containerId = 'accordion-container';
-        const container = document.getElementById(containerId);
-        if (!container) return;
-        const originalProjects = Array.isArray(filteredProjects) ? filteredProjects : (StateStore.get('projectsList') || []);
-        
-        if (originalProjects.length === 0) {
-          renderEmptyState(containerId, 'inbox', '找不到符合條件的專案資料'); return;
-        }
-
-        const now = new Date();
-        const todayFormatted = `${now.getFullYear()}/${String(now.getMonth()+1).padStart(2,'0')}/${String(now.getDate()).padStart(2,'0')}`;
-        const allEvents = StateStore.get('calendarEvents') || [];
-        
-        let projects = originalProjects.map(proj => {
-           let todayTasks = [];
-           let futureTasks = [];
-           let projEvents = allEvents.filter(e => e.projectId === proj.projectId && e.startTime);
-           projEvents.forEach(e => {
-               let eDateObj = new Date(e.startTime);
-               let eDateStr = `${eDateObj.getFullYear()}/${String(eDateObj.getMonth()+1).padStart(2,'0')}/${String(eDateObj.getDate()).padStart(2,'0')}`;
-               if(eDateStr === todayFormatted) todayTasks.push(e);
-               else if(eDateObj > now) futureTasks.push(e);
-           });
-           todayTasks.sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
-           futureTasks.sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
-           return { ...proj, todayTasks, futureTasks };
-        });
-
-        projects.sort((a, b) => {
-           let aHas = a.todayTasks.length > 0;
-           let bHas = b.todayTasks.length > 0;
-           if(aHas && !bHas) return -1;
-           if(!aHas && bHas) return 1;
-           if(aHas && bHas) return new Date(a.todayTasks[0].startTime) - new Date(b.todayTasks[0].startTime);
-           return 0;
-        });
-
-        let html = '';
-        projects.forEach(proj => {
-          const status = proj.scheduleStatus || "未排入";
-          const badgeClass = status.includes("未排入") ? "badge-mono outline" : "badge-mono";
-          let loggedTasks = 0;
-          if(proj.workLog && Array.isArray(proj.workLog)) {
-              loggedTasks = new Set(proj.workLog.map(l => l.taskName)).size;
-          }
-          
-          let iframeSrc = getEmbedUrl(proj.quoteUrl);
-          let quoteHtml = iframeSrc
-              ? `<div style="margin-bottom:16px;">
-                  <div style="font-weight:600; margin-bottom:8px; display:flex; align-items:center; gap:6px;"><i data-lucide="file-search" style="width:16px;"></i> 報價單即時預覽</div>
-                  <iframe src="${iframeSrc}" class="quote-iframe"></iframe>
-                 </div>`
-              : `<div class="caption" style="margin-bottom:16px;">無對應之報價單連結可預覽</div>`;
-
-          const hasCompletedTasks = Object.values(proj.taskStatus || {}).includes(true);
-          const progress = Math.min(100, Math.floor((loggedTasks / 5) * 100)); 
-          const renderTaskList = (tasks) => tasks.map(t => `<div style="padding:4px 0; font-size:13px; display:flex; gap:8px;"><span style="color:var(--text-muted);">${new Date(t.startTime).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</span> <span>${t.taskName}</span></div>`).join('');
-          
-          const hasTodayTasks = proj.todayTasks.length > 0;
-          const todayBadge = hasTodayTasks 
-              ? `<span class="badge-mono" style="background:#fef08a; color:#854d0e; font-size:11px; font-weight:700; padding:2px 6px; border-radius:4px; margin-right:8px; display:inline-flex; align-items:center; gap:2px;"><i data-lucide="zap" style="width:12px;height:12px;"></i> 今日有任務</span>` 
-              : '';
-
-          html += `
-            <div class="accordion-item" data-project-id="${proj.projectId}">
-              <div class="accordion-header" onclick="toggleAccordion(this)">
-                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
-                  <div style="font-weight: 600; font-size: 15px; display:flex; align-items:center; flex-wrap:wrap; gap:4px;">
-                    ${todayBadge}
-                    [${proj.projectId}] ${proj.companyName || proj.clientName}
-                  </div>
-                  <span class="${badgeClass}">${status}</span>
-                </div>
-                <div style="font-size: 13px; color: var(--text-secondary);">客戶ID：${proj.clientId || 'N/A'} | 服務項目：${proj.serviceItem}</div>
-                <div style="display: flex; align-items: center; gap: 8px; margin-top: 4px;">
-                  <div class="progress-bar-bg"><div class="progress-bar-fill" style="width: ${progress}%;"></div></div>
-                  <span style="font-size: 12px; color: var(--text-muted); min-width: 30px; text-align: right;">${progress}%</span>
-                </div>
-              </div>
-              <div class="accordion-body">
-                ${quoteHtml}
-                
-                ${hasTodayTasks ? `
-                  <div style="margin-bottom:12px;">
-                    <div style="font-weight:600; font-size:13px; color:#ea580c; margin-bottom:4px;">今日需執行任務</div>
-                    ${renderTaskList(proj.todayTasks)}
-                  </div>
-                ` : '<div class="caption" style="margin-bottom:12px;">今日無排定任務</div>'}
-                
-                <hr class="divider">
-                
-                ${proj.futureTasks.length > 0 ? `
-                  <div style="margin-bottom:16px;">
-                    <div style="font-weight:600; font-size:13px; margin-bottom:4px;">明日以後排定任務 (${proj.futureTasks.length})</div>
-                    ${renderTaskList(proj.futureTasks.slice(0,3))}
-                    ${proj.futureTasks.length > 3 ? '<div class="caption">...及其他更多任務</div>' : ''}
-                  </div>
-                ` : ''}
-
-                <div style="display:flex; flex-direction:column; gap:8px;">
-                  <button class="btn-primary" style="width:100%;" onclick="jumpToFishbone('${proj.projectId}')">
-                    <i data-lucide="arrow-right" style="width:16px;height:16px;"></i> 一鍵前往魚骨圖查看與編輯排程
-                  </button>
-                  ${hasCompletedTasks ? `
-                  <button class="btn-secondary" style="width:100%; border: 1px solid #111111; color: #111111;" onclick="jumpToEmail('${proj.projectId}')">
-                    <i data-lucide="mail" style="width:16px;height:16px;"></i> 專案有已完成任務，一鍵前往 Email
-                  </button>` : ''}
-                  <button class="btn-secondary" style="width:100%; color:#ef4444; border-color:#ef4444;" onclick="handleDeleteProject('${proj.projectId}', '${proj.sheetType}', ${proj._rowId})">
-                    <i data-lucide="trash-2" style="width:16px;height:16px;"></i> 刪除專案追蹤紀錄
-                  </button>
-                </div>
-              </div>
-            </div>`;
-        });
-        container.innerHTML = html; lucide.createIcons();
-      }
-
-      function jumpToFishbone(projectId) {
-         // 【修復重點 1】：跳轉前先清除殘留的舊節點記憶
-         fishboneActiveNode = null; 
-         
-         StateStore.set('activeProjectId', projectId);
-         const selectEl = document.getElementById("project-select-fishbone");
-         if(selectEl) { 
-            selectEl.value = projectId; 
-         }
-         switchView('fishbone', document.querySelectorAll('.nav-item')[1]);
-      }
-
-      function jumpToEmail(projectId) {
-         StateStore.set('activeProjectId', projectId);
-         switchView('email', document.querySelectorAll('.nav-item')[2]);
-      }
-
-      function toggleAccordion(headerEl) {
-        const currentItem = headerEl.closest('.accordion-item');
-        const currentBody = currentItem.querySelector('.accordion-body');
-        const isCurrentlyOpen = currentBody.style.display === 'block';
-        
-        document.querySelectorAll('.accordion-body').forEach(body => { body.style.display = 'none'; });
-        
-        if (!isCurrentlyOpen) {
-          currentBody.style.display = 'block';
-          const projId = currentItem.getAttribute('data-project-id');
-          if (projId && StateStore.get('activeProjectId') !== projId) {
-            StateStore.set('activeProjectId', projId);
-          }
-        }
-      }
-
-      let fishboneActiveNode = null;
-      let draggedTaskName = null;
-      let draggedItemElement = null;
-
-      function selectFishboneNode(nodeKey) { 
-          fishboneActiveNode = String(nodeKey).trim(); 
-          renderFishboneDiagram(); 
-      }
-
-      function renderFishboneDiagram() {
-        const activeProjId = StateStore.get('activeProjectId');
-        const containerId = 'fishbone-svg-container';
-        const detailContainer = document.getElementById('fishbone-detail-container');
-        
-        if (!activeProjId) {
-          renderEmptyState(containerId, 'folder-search', '請先自專案手風琴中選擇並產出專案以查看魚骨圖');
-          detailContainer.innerHTML = ''; return;
-        }
-        
-        const project = StateStore.get('projectsList').find(p => p.projectId === activeProjId);
-        if (!project) return;
-        
-        const calendarEvents = StateStore.get('calendarEvents') || [];
-        const projectEvents = calendarEvents.filter(e => e.projectId === activeProjId);
-        const eventMap = {};
-        projectEvents.forEach(e => { eventMap[`${e.nodeName}_${e.taskName}`] = e.startTime; });
-
-        const taskStatusObj = project.taskStatus || {};
-        let customNodes = [];
-        try {
-          const rawCustom = project.customNodes;
-          if (Array.isArray(rawCustom)) customNodes = rawCustom; 
-          else if (rawCustom && Array.isArray(rawCustom.nodes)) customNodes = rawCustom.nodes;
-        } catch(e) {}
-        if (!Array.isArray(customNodes)) customNodes = [];
-        
-        let nodesMap = new Map();
-        
-        customNodes.forEach(cn => {
-           if (!cn.node) return;
-           if (taskStatusObj[cn.task] === 'DELETED') return; 
-           let key = cn.node + '_' + (cn.phase || '單次');
-           if (!nodesMap.has(key)) nodesMap.set(key, { name: cn.node, phase: cn.phase||'單次', title: cn.title||cn.node, tasks: [] });
-           const sTime = eventMap[`${cn.node}_${cn.task}`] || cn.date || null;
-           nodesMap.get(key).tasks.push({ name: cn.task, duration: cn.duration, date: cn.date, startTime: sTime });
-        });
-        
-        const nodesList = Array.from(nodesMap.values());
-        if (nodesList.length === 0) {
-           renderEmptyState(containerId, 'activity', '該專案無可用之工作節點'); detailContainer.innerHTML = ''; return;
-        }
-
-        if (fishboneActiveNode) fishboneActiveNode = String(fishboneActiveNode).trim();
-        
-        // 【修復重點 2】：防呆機制！如果目前記憶的節點不在新專案裡面，強制重置為第一個節點
-        if (!fishboneActiveNode || !nodesMap.has(fishboneActiveNode)) {
-            if (nodesList.length > 0) {
-                fishboneActiveNode = nodesList[0].name + '_' + nodesList[0].phase;
-            }
-        }
-        
-        const isSub = project.sheetType === '專案-訂閱服務';
-        
-        let onceNodes = [];
-        let recurringNodes = [];
-        nodesList.forEach(n => {
-            if (n.phase === '循環') recurringNodes.push(n);
-            else onceNodes.push(n);
-        });
-
-        const nodeWidth = 180; 
-        const svgContainer = document.getElementById(containerId);
-        const todayD = new Date();
-        const todayFormatted = `${todayD.getFullYear()}/${String(todayD.getMonth()+1).padStart(2,'0')}/${String(todayD.getDate()).padStart(2,'0')}`;
-        
-        let svgHtml = '';
-        
-        // 繪製單一節點 SVG 的邏輯 (加入當日黃色 Highlight 高光版)
-        const genNodeSvg = (node, index, cx, cy, isTop) => {
-           let isActive = fishboneActiveNode === (node.name + '_' + node.phase);
-           
-           // 【美學設定 1】極簡 UI 配色
-           let fill = isActive ? '#111111' : '#FFFFFF';
-           let textFill = isActive ? '#FFFFFF' : '#111111';
-           let strokeColor = isActive ? '#111111' : '#E5E5E5'; 
-           let accentColor = '#ea580c'; // 你的專屬質感紅橘色
-
-           // 【核心邏輯】精算工時與完成率
-           let totalHours = 0;
-           let completedHours = 0;
-           node.tasks.forEach(t => {
-               let dur = parseFloat(t.duration) || 0;
-               totalHours += dur;
-               if (taskStatusObj[t.name] === true) {
-                   completedHours += dur;
-               }
-           });
-           let progressPercent = totalHours === 0 ? 0 : Math.round((completedHours / totalHours) * 100);
-
-           // 【美學設定 2】左側極致質感「線條進度環」
-           const pr = 10; 
-           const pcx = cx - 48; 
-           const pcy = cy;
-           const circumference = 2 * Math.PI * pr;
-           const strokeDashoffset = circumference - (progressPercent / 100) * circumference;
-           let ringColor = progressPercent === 100 ? '#111111' : accentColor;
-           
-           let progressSvg = `
-               <g style="opacity: ${totalHours > 0 ? 1 : 0.4};">
-                   <circle cx="${pcx}" cy="${pcy}" r="${pr}" fill="none" stroke="#F4F4F5" stroke-width="1.5" />
-                   <circle cx="${pcx}" cy="${pcy}" r="${pr}" fill="none" stroke="${ringColor}" stroke-width="1.5" stroke-dasharray="${circumference}" stroke-dashoffset="${strokeDashoffset}" stroke-linecap="round" transform="rotate(-90 ${pcx} ${pcy})" style="transition: stroke-dashoffset 0.5s ease;" />
-                   <text x="${pcx}" y="${pcy + 2.5}" font-size="7" font-family="'Inter', sans-serif" font-weight="600" text-anchor="middle" fill="#666666">${progressPercent}</text>
-               </g>
-           `;
-
-           // 【美學設定 3】日期排版與「當日黃色 Highlight」判斷
-           let nodeDateStr = "尚未排程";
-           const scheduledTasks = node.tasks.filter(t => t.startTime);
-           if (scheduledTasks.length > 0) {
-               scheduledTasks.sort((a,b) => new Date(a.startTime) - new Date(b.startTime));
-               const d = new Date(scheduledTasks[0].startTime);
-               nodeDateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-           }
-           
-           // 判斷該節點日期是否等於今天
-           let isTodayNode = (nodeDateStr === todayFormatted);
-           
-           // 文字顏色邏輯：尚未排程(灰)、今日(深黑，確保在黃底上清晰)、其他(紅橘)
-           let finalDateColor = nodeDateStr === "尚未排程" ? "#999999" : (isTodayNode ? "#111111" : accentColor);
-           let dateFontWeight = nodeDateStr === "尚未排程" ? "400" : "700";
-
-           // 【美學設定 4】無省略號、適度換行的字體排版
-           let maxChars = 8; 
-           let nameLines = [];
-           for (let i = 0; i < node.name.length; i += maxChars) {
-               nameLines.push(node.name.slice(i, i + maxChars));
-           }
-
-           let nameHtml = '';
-           let dateY;
-           let lineStartY = isTop ? cy + 24 : cy - 24; 
-           let lineEndY = isTop ? cy + 45 : cy - 45; 
-
-           if (isTop) {
-               dateY = cy - 40 - (nameLines.length * 18); 
-               nameLines.forEach((line, idx) => {
-                   let ly = cy - 34 - ((nameLines.length - 1 - idx) * 18);
-                   nameHtml += `<text x="${cx}" y="${ly}" font-size="13" font-family="'Noto Sans TC', sans-serif" font-weight="600" text-anchor="middle" fill="#111111" letter-spacing="0.5">${line}</text>`;
-               });
-           } else {
-               nameLines.forEach((line, idx) => {
-                   let ly = cy + 44 + (idx * 18);
-                   nameHtml += `<text x="${cx}" y="${ly}" font-size="13" font-family="'Noto Sans TC', sans-serif" font-weight="600" text-anchor="middle" fill="#111111" letter-spacing="0.5">${line}</text>`;
-               });
-               dateY = cy + 46 + (nameLines.length * 18); 
-           }
-
-           // 【重點實作】今日任務背景黃色高光 (Highlighter)
-           let dateBgHtml = '';
-           if (isTodayNode) {
-               // 繪製黃色矩形：x 向左推置中，y 向上推包覆文字，rx="4" 增加微圓角質感
-               dateBgHtml = `<rect x="${cx - 40}" y="${dateY - 13}" width="80" height="18" rx="4" fill="#FDE047" />`;
-           }
-
-           return `
-             <g style="cursor:pointer; outline: none;" onclick="selectFishboneNode('${node.name}_${node.phase}')">
-               <!-- 隱形點擊區域 -->
-               <rect x="${cx - 70}" y="${isTop ? dateY - 20 : cy - 30}" width="140" height="${isTop ? cy - dateY + 50 : dateY - cy + 50}" fill="transparent" />
-
-               <!-- 1. 繪製黃色高光背景 (必須在文字前面，SVG的圖層是後寫的蓋在上面) -->
-               ${dateBgHtml}
-               <!-- 2. 繪製日期文字 -->
-               <text x="${cx}" y="${dateY}" font-size="12" font-family="'Inter', sans-serif" font-weight="${dateFontWeight}" text-anchor="middle" fill="${finalDateColor}" letter-spacing="0.5">${nodeDateStr}</text>
-
-               <!-- 動態換行後的工作節點名稱 -->
-               ${nameHtml}
-
-               <!-- 連接主軸的極細淡灰虛線 -->
-               <line x1="${cx}" y1="${lineStartY}" x2="${cx}" y2="${lineEndY}" stroke="#E5E5E5" stroke-width="1.5" stroke-dasharray="3 3" />
-
-               <!-- 圓圈主體 -->
-               <circle cx="${cx}" cy="${cy}" r="24" fill="${fill}" stroke="${strokeColor}" stroke-width="2" style="transition: all 0.3s ease;" />
-               
-               <!-- 圓圈內的純粹數字 -->
-               <text x="${cx}" y="${cy + 5}" font-size="16" font-family="'Inter', sans-serif" font-weight="600" text-anchor="middle" fill="${textFill}">${index+1}</text>
-               
-               <!-- 左側：極致質感進度環 -->
-               ${progressSvg}
-             </g>
-           `;
-        };
-
-        if (isSub && (onceNodes.length > 0 || recurringNodes.length > 0)) {
-            const maxLen = Math.max(onceNodes.length, recurringNodes.length);
-            const svgWidth = Math.max(svgContainer.clientWidth || 800, maxLen * nodeWidth + 100);
-            svgHtml = `<svg width="${svgWidth}" height="480" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto; font-family: 'Inter', 'Noto Sans TC', sans-serif;">`;
-            
-            if (onceNodes.length > 0) {
-                const cyTop = 130;
-                svgHtml += `<line x1="20" y1="${cyTop + 40}" x2="${svgWidth - 20}" y2="${cyTop + 40}" stroke="#111111" stroke-width="3" stroke-linecap="round" />`;
-                svgHtml += `<text x="20" y="30" font-size="14" font-weight="700" fill="#ea580c">◆ 單次任務 / 專案啟動與結案流程</text>`;
-                onceNodes.forEach((node, index) => {
-                    svgHtml += genNodeSvg(node, index, 80 + index * nodeWidth, cyTop, true);
-                });
-            }
-            
-            if (recurringNodes.length > 0) {
-                const cyBtm = 330;
-                svgHtml += `<line x1="20" y1="${cyBtm - 40}" x2="${svgWidth - 20}" y2="${cyBtm - 40}" stroke="#3b82f6" stroke-width="3" stroke-dasharray="8 4" stroke-linecap="round" />`;
-                svgHtml += `<text x="20" y="230" font-size="14" font-weight="700" fill="#3b82f6">◆ 重複循環 / 每週或每月執行流程</text>`;
-                recurringNodes.forEach((node, index) => {
-                    svgHtml += genNodeSvg(node, index, 80 + index * nodeWidth, cyBtm, false);
-                });
-            }
-            svgHtml += `</svg>`;
-        } else {
-            const svgWidth = Math.max(svgContainer.clientWidth || 800, nodesList.length * nodeWidth + 100);
-            const centerY = 160;
-            svgHtml = `<svg width="${svgWidth}" height="320" xmlns="http://www.w3.org/2000/svg" style="display: block; margin: 0 auto; font-family: 'Inter', 'Noto Sans TC', sans-serif;">`;
-            svgHtml += `<line x1="20" y1="${centerY}" x2="${svgWidth - 20}" y2="${centerY}" stroke="#111111" stroke-width="3" stroke-linecap="round" />`;
-            
-            nodesList.forEach((node, index) => {
-               const cx = 80 + index * nodeWidth;
-               const isTop = index % 2 === 0; 
-               const cy = isTop ? 100 : 220;
-               svgHtml += genNodeSvg(node, index, cx, cy, isTop);
-            });
-            svgHtml += `</svg>`;
-        }
-        
-        svgContainer.innerHTML = svgHtml;
-        
-        const activeData = nodesMap.get(fishboneActiveNode);
-        
-        // 【修復重點 3】：終極防呆！萬一找不到活躍節點，立刻中斷，保護整個網頁不崩潰
-        if (!activeData) {
-            detailContainer.innerHTML = '<p class="caption">無法載入節點資料，請重新選擇節點。</p>';
-            return;
-        }
-        
-        const currentOrder = project.taskOrder && project.taskOrder[activeData.name];
-        if (currentOrder && Array.isArray(currentOrder)) {
-            activeData.tasks.sort((a, b) => {
-                let idxA = currentOrder.indexOf(a.name); let idxB = currentOrder.indexOf(b.name);
-                if (idxA === -1) idxA = 999; if (idxB === -1) idxB = 999;
-                return idxA - idxB;
-            });
-        }
-
-        let subBadge = (isSub && activeData.phase === '循環') ? `<span class="badge-mono outline" style="margin-left:8px; border-color:#3b82f6; color:#3b82f6;">[重複循環]</span>` : '';
-
-        let detailsHtml = `
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 16px; border-bottom: 2px solid #111111; padding-bottom: 12px;">
-            <div>
-               <h3 style="margin: 0 0 4px 0; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-                 <span class="badge-mono">節點 ${activeData.name}</span>
-                 ${activeData.title || activeData.name} ${subBadge}
-               </h3>
-               ${activeData.phase ? `<div class="caption">軌道任務屬性：${activeData.phase}</div>` : ''}
-            </div>
+      <div id="client-tab-new">
+        <div class="header-action-row" style="margin-bottom: 20px;">
+          <h3 style="margin:0; font-size: 16px;">客戶建檔</h3>
+          <div class="draft-controls">
+            <span class="draft-status" id="client-draft-status">已自動儲存</span>
+            <select class="draft-select" id="client-draft-select" onchange="loadClientDraftFromLib()"><option value="">載入草稿...</option></select>
+            <button class="draft-btn" onclick="saveClientDraftToLib()">儲存進度</button>
+            <button class="secondary-sm" onclick="clearNewClientForm()">清空欄位</button>
           </div>
-          <div id="tasks-container" style="display:flex; flex-direction:column; gap: 12px;">`;
+        </div>
+        <div class="card" id="client-form-area">
+          <p style="font-size: 13px; color: var(--text-muted); margin-top: 0;">輸入統一編號將自動載入舊客戶資料。</p>
+          <label style="margin-top:0;">統一編號</label><input type="text" id="client-taxId" placeholder="輸入統編後點擊空白處..." onblur="fetchClientInfo()" oninput="autoSaveClient()">
+          <label>公司名稱</label><input type="text" id="client-company" placeholder="公司名稱" oninput="autoSaveClient()">
+          <label>代表人</label><input type="text" id="client-rep" placeholder="代表人" oninput="autoSaveClient()">
+          <label>業務聯絡人</label><input type="text" id="client-contact" placeholder="業務聯絡人" oninput="autoSaveClient()">
+          <label>聯繫電話</label><input type="tel" id="client-phone" placeholder="聯繫電話" oninput="autoSaveClient()">
+          <label>電子信箱</label><input type="email" id="client-email" placeholder="電子信箱" oninput="autoSaveClient()">
+          <label>公司地址</label><input type="text" id="client-address" placeholder="公司地址" oninput="autoSaveClient()">
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">服務勾選</h3>
+          <div id="service-list"><p style="color:var(--text-muted); font-size:14px;">資料讀取中...</p></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">費用試算</h3>
+          <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">未稅金額：$<span id="text-subtotal">0</span></div>
+          <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">營業稅額：$<span id="text-tax">0</span></div>
+          <div style="font-size: 14px; color: var(--text-muted);">原價總計：$<span id="text-original-total">0</span></div>
+          
+          <label style="margin-top: 16px;">優惠折抵金額 (若無請留空)</label>
+          <input type="number" id="client-custom-price" placeholder="輸入折抵金額 (例如: 1000)" oninput="calcTotal(); autoSaveClient()">
+          
+          <div class="price-display">最終總計 $<span id="text-total">0</span></div>
+        </div>
+
+        <div class="card">
+          <h3 class="card-title">合約簽署</h3>
+          <label style="margin-top:0;">約定條款確認</label><textarea id="client-terms" rows="10" placeholder="勾選服務後將自動帶入條款" oninput="autoSaveClient()"></textarea>
+          
+          <label style="margin-top: 24px;">客戶簽名 (將自動押上當下日期時間)</label>
+          <div id="sig-preview-container" style="margin-top: 10px; display: none;">
+            <img id="sig-preview-img" src="" style="max-width: 200px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--hover-bg);">
+          </div>
+          <button class="secondary" onclick="openSignatureModal('new')" style="width: auto; padding: 12px 24px; margin-top: 16px;">點我簽名 / 重簽</button>
+        </div>
+        <button class="primary" onclick="openPreviewModal()" style="margin-bottom: 60px;">預覽 A4 報價合約</button>
+      </div>
+
+      <div id="client-tab-history" style="display: none;">
+        <div class="card">
+          <h3 class="card-title" style="margin-bottom: 20px;">歷史報價紀錄</h3>
+          
+          <div class="search-filter-container" style="display:flex; gap:12px; margin-bottom:24px; align-items:center; flex-wrap:wrap;">
+            <input type="text" id="history-search" class="search-bar" placeholder="模糊搜尋公司、專案ID或服務..." oninput="filterHistory()" style="flex:1; min-width:200px; margin-bottom:0;">
+            
+            <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 0;">
+              <input type="date" id="history-date-start" class="search-bar" onchange="filterHistory()" style="width: auto; margin: 0; color:var(--text-muted);">
+              <span style="color:var(--text-muted); font-size:14px; font-weight:500; white-space: nowrap;">至</span>
+              <input type="date" id="history-date-end" class="search-bar" onchange="filterHistory()" style="width: auto; margin: 0; color:var(--text-muted);">
+            </div>
+            
+            <button class="secondary" onclick="clearHistoryFilter()" style="margin:0; width:auto;">清除篩選</button>
+          </div>
+
+          <table class="history-table">
+            <thead><tr><th>專案編號</th><th>簽約時間</th><th>公司名稱</th><th>服務項目摘要</th><th>總計 (含稅)</th><th>操作與檔案</th></tr></thead>
+            <tbody id="history-table-body"><tr><td colspan="6" style="text-align:center; color:var(--text-muted);">載入中...</td></tr></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+    
+    <!-- ====== 專案追蹤管理 (原第三頁) ====== -->
+    <div id="page-external" class="page">
+      <div class="header-action-row"><div class="section-title">專案追蹤管理</div></div>
+      <div class="card" style="height: calc(100vh - 180px); min-height: 600px; display: flex; flex-direction: column;">
+        <iframe src="https://alwayslucky2hand-ops.github.io/rubyproject2/" style="width: 100%; height: 100%; border: none; flex: 1; border-radius: 8px;"></iframe>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="modal-overlay" id="preview-modal">
+    <div class="modal-content" style="max-width: 900px; background: #e5e5ea;">
+      <div class="modal-header" style="background: var(--bg-color);"><h2>A4 報價合約預覽</h2><button class="close-btn" onclick="closePreviewModal()">&times;</button></div>
+      <div class="modal-body" id="preview-body" style="padding: 40px 20px;"></div>
+      <div class="modal-footer" style="justify-content: flex-end; background: var(--bg-color);">
+        <button class="secondary" onclick="closePreviewModal()" style="margin: 0; width: auto;">返回修改</button>
+        <button class="primary" id="btn-confirm-submit" onclick="submitClient()" style="margin: 0; width: auto;">確認簽約並建檔分發</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="edit-history-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 style="display:flex; align-items:baseline; flex-wrap: wrap;">編輯報價紀錄 <span id="edit-modal-title-info" style="font-size: 14px; font-weight: 500; color: var(--text-muted); margin-left: 10px;"></span></h2>
         
-        if (activeData.tasks.length === 0) {
-            detailsHtml += `<p class="caption">此節點無細項任務紀錄</p>`;
-        } else {
-           activeData.tasks.forEach((t, i) => {
-              let taskDateStr = "尚未排程";
-              let rawDate = "";
-              if (t.startTime) {
-                  const d = new Date(t.startTime);
-                  taskDateStr = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')}`;
-                  rawDate = d.toISOString().split('T')[0];
-              }
+        <div class="draft-controls" style="margin-left: auto; margin-right: 20px;">
+          <span class="draft-status" id="edit-draft-status">已儲存</span>
+          <button class="secondary-sm" onclick="saveEditDraft()">儲存進度</button>
+          <button class="secondary-sm" onclick="loadEditDraft()">載入草稿</button>
+        </div>
+        
+        <button class="close-btn" onclick="closeEditHistoryModal()">&times;</button>
+      </div>
+      <div class="modal-body" style="padding-top: 0; background-color: #fafafc;">
+        <input type="hidden" id="edit-history-pid">
+        <input type="hidden" id="edit-history-rowId">
+        
+        <div class="card" style="margin-top: 24px;">
+          <h3 class="card-title" style="font-size:16px; margin-top:0;">客戶建檔</h3>
+          <label style="margin-top:0;">統一編號</label><input type="text" id="edit-history-taxId" oninput="autoSaveEdit()">
+          <label>公司名稱</label><input type="text" id="edit-history-company" oninput="autoSaveEdit()">
+          <label>代表人</label><input type="text" id="edit-history-rep" oninput="autoSaveEdit()">
+          <label>業務聯絡人</label><input type="text" id="edit-history-contact" oninput="autoSaveEdit()">
+          <label>聯繫電話</label><input type="tel" id="edit-history-phone" oninput="autoSaveEdit()">
+          <label>電子信箱</label><input type="email" id="edit-history-email" oninput="autoSaveEdit()">
+          <label>公司地址</label><input type="text" id="edit-history-address" oninput="autoSaveEdit()">
+        </div>
 
-              const isCompleted = taskStatusObj[t.name] === true;
-              const hasLog = project.workLog && project.workLog.some(l => l.taskName === t.name && !l.isSystem);
-              let cardBg = "#FFFFFF", textColor = "#111111", mutedColor = "var(--text-muted)", borderColor = "var(--border-light)";
-              if (isCompleted) { cardBg = "#111111"; textColor = "#FFFFFF"; mutedColor = "#999999"; borderColor = "#333333"; } 
-              else if (hasLog) { cardBg = "#F4F4F5"; }
-              
-              let isTodayTask = (taskDateStr === todayFormatted);
-              let dateStyle = isTodayTask 
-                  ? 'background:#fef08a; color:#854d0e; padding:2px 6px; border-radius:4px; font-weight:700;' 
-                  : `color:${t.startTime ? (isCompleted ? '#FFFFFF' : 'var(--color-accent)') : ''}; font-weight:500;`;
+        <div class="card">
+          <h3 class="card-title" style="font-size:16px; margin-top:0;">服務勾選 (依據原紀錄預先載入)</h3>
+          <div id="edit-service-list"><p style="color:var(--text-muted); font-size:14px;">資料載入中...</p></div>
+        </div>
 
-              const editDateId = `inline-edit-date-${i}`;
-              const addLogId = `inline-add-log-${i}`;
+        <div class="card">
+          <h3 class="card-title" style="font-size:16px; margin-top:0;">費用試算</h3>
+          <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">未稅金額：$<span id="edit-text-subtotal">0</span></div>
+          <div style="font-size: 14px; color: var(--text-muted); margin-bottom: 8px;">營業稅額：$<span id="edit-text-tax">0</span></div>
+          <div style="font-size: 14px; color: var(--text-muted);">原價總計：$<span id="edit-text-original-total">0</span></div>
+          
+          <label style="margin-top: 16px;">優惠折抵金額 (若無請留空)</label>
+          <input type="number" id="edit-custom-price" placeholder="輸入折抵金額 (例如: 1000)" oninput="calcEditTotal(); autoSaveEdit()">
+          
+          <div class="price-display">最終總計 $<span id="edit-text-total">0</span></div>
+        </div>
 
-              detailsHtml += `
-                <div class="card-mono draggable-task" draggable="true" data-task-name="${t.name}"
-                     ondragstart="handleDragStart(event)" ondragover="handleDragOver(event)"
-                     ondrop="handleDrop(event, '${project.projectId}', '${activeData.name}')"
-                     ondragenter="handleDragEnter(event)" ondragleave="handleDragLeave(event)" ondragend="handleDragEnd(event)"
-                     style="display:flex; justify-content:space-between; align-items:center; background:${cardBg}; color:${textColor}; border-color:${borderColor}; flex-wrap: wrap; gap: 8px; position:relative;">
-                  
-                  <div style="flex:1; min-width:200px; display:flex; align-items:center; gap: 12px;">
-                    <i data-lucide="grip-vertical" style="width:16px; height:16px; color:${mutedColor}; cursor:grab;" title="拖曳可排序"></i>
-                    <div>
-                        <div style="font-weight:600; display:flex; align-items:center; gap:8px;">${t.name}</div>
-                        <div class="caption" style="color:${mutedColor}; margin-top:4px; display:flex; align-items:center; gap: 8px; flex-wrap:wrap;">
-                          <span>預估工時: ${t.duration || '0.25'} hr</span>
-                          <span style="color:${borderColor};">|</span>
-                          <span style="${dateStyle} display:flex; align-items:center; gap:4px;">
-                            <i data-lucide="calendar" style="width:12px; height:12px;"></i> ${taskDateStr}
-                          </span>
-                        </div>
-                    </div>
-                  </div>
-                  
-                  <div style="display:flex; gap: 4px; flex-wrap:wrap;">
-                    <button class="btn-icon success ${isCompleted ? 'active' : ''}" title="${isCompleted ? '取消完成' : '標示完成'}" onclick="toggleTaskCompletion('${project.projectId}', '${project._rowId}', '${project.sheetType}', '${t.name}', ${isCompleted})">
-                      <i data-lucide="${isCompleted ? 'check-circle-2' : 'check'}" style="width:16px; height:16px;"></i>
-                    </button>
-                    <button class="btn-icon" title="排程 / 改期" onclick="toggleInlinePanel('${editDateId}')">
-                      <i data-lucide="calendar-clock" style="width:16px; height:16px;"></i>
-                    </button>
-                    <button class="btn-icon" title="寫日誌" onclick="toggleInlinePanel('${addLogId}')">
-                      <i data-lucide="pencil" style="width:16px; height:16px;"></i>
-                    </button>
-                    <button class="btn-icon danger" title="刪除任務" onclick="confirmDeleteTask('${project.projectId}', '${project._rowId}', '${project.sheetType}', '${activeData.name}', '${t.name}')">
-                      <i data-lucide="trash-2" style="width:16px; height:16px;"></i>
-                    </button>
-                  </div>
-                </div>
-                
-                <div id="${editDateId}" class="inline-action-panel card-mono" style="display:none; margin-top:-8px; border-top:none; border-radius:0 0 8px 8px; background:#fff; border-color:var(--border-light);">
-                  <div style="display:flex; align-items:center; gap:12px;">
-                     <label style="font-size:13px; font-weight:600;">新排程日期：</label>
-                     <input type="date" id="date-input-${i}" class="input-field" value="${rawDate}" style="width:160px; height:36px;">
-                     <button class="btn-primary" style="height:36px; font-size:13px;" onclick="submitEditTaskDate('${project.projectId}', '${activeData.name}', '${t.name}', 'date-input-${i}')">儲存</button>
-                     <button class="btn-icon ghost" onclick="toggleInlinePanel('${editDateId}')"><i data-lucide="x" style="width:16px;height:16px;"></i></button>
-                  </div>
-                </div>
+        <div class="card" style="margin-bottom:0;">
+          <h3 class="card-title" style="font-size:16px; margin-top:0;">合約簽署</h3>
+          <label style="margin-top:0;">約定條款確認</label><textarea id="edit-history-terms" rows="8" placeholder="勾選服務後將自動帶入條款" oninput="autoSaveEdit()"></textarea>
+          
+          <label style="margin-top:24px;">客戶簽名</label>
+          <div id="edit-sig-placeholder" style="background: var(--hover-bg); padding: 20px; border-radius: 10px; border: 1px dashed var(--border-color);">
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom:0; margin-top:0;">目前將沿用歷史簽名，不需更動請略過。</p>
+          </div>
+          
+          <div id="edit-sig-preview-container" style="margin-top: 10px; display: none;">
+            <img id="edit-sig-preview-img" src="" style="max-width: 200px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--hover-bg);">
+          </div>
+          
+          <div style="display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap;">
+            <button class="secondary" onclick="openSignatureModal('edit')" style="width: auto; padding: 10px 20px; margin: 0; flex:1;">點我重簽</button>
+            <button class="secondary" onclick="cancelEditCanvas()" style="width: auto; padding: 10px 20px; margin: 0; flex:1;">取消重簽 (沿用舊版)</button>
+          </div>
+        </div>
 
-                <div id="${addLogId}" class="inline-action-panel card-mono" style="display:none; margin-top:-8px; border-top:none; border-radius:0 0 8px 8px; background:#fff; border-color:var(--border-light);">
-                   <div style="display:flex; flex-direction:column; gap:8px;">
-                     <label style="font-size:13px; font-weight:600;">撰寫日誌</label>
-                     <textarea id="log-input-${i}" class="input-field" placeholder="紀錄執行細節..." style="min-height:60px;"></textarea>
-                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <div style="display:flex; align-items:center; gap:8px;">
-                           <span style="font-size:13px;">完成工時:</span>
-                           <input type="number" id="log-dur-${i}" class="input-field" step="0.25" min="0.25" value="0.25" style="width:80px; height:32px;">
-                        </div>
-                        <div style="display:flex; gap:8px;">
-                           <button class="btn-secondary" style="height:32px;" onclick="toggleInlinePanel('${addLogId}')">取消</button>
-                           <button class="btn-primary" style="height:32px;" onclick="submitTaskLog('${project.projectId}', '${project._rowId}', '${project.sheetType}', '${activeData.name}', '${t.name}', 'log-input-${i}', 'log-dur-${i}')">寫入</button>
-                        </div>
-                     </div>
-                   </div>
-                </div>
-              `;
-           });
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="secondary" onclick="closeEditHistoryModal()" style="margin: 0; width: auto;">取消</button>
+        <button class="primary" id="btn-submit-edit" onclick="submitEditHistory()" style="margin: 0; width: auto;">儲存變更並重新產生 PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="signature-modal" style="z-index: 5000;">
+    <div class="modal-content" style="max-width: 600px; max-height: none;">
+      <div class="modal-header"><h2>請在此簽名</h2><button class="close-btn" onclick="closeSignatureModal()">&times;</button></div>
+      <div class="modal-body" style="padding: 24px;">
+        <p style="font-size: 13px; color: var(--text-muted); margin-top:0; margin-bottom: 16px;">簽名後將自動押上當下時間戳記。</p>
+        <canvas id="global-signature-pad" style="width:100%; height:280px; background:var(--hover-bg); border-radius:10px; border:1px dashed var(--border-color); touch-action: none;"></canvas>
+      </div>
+      <div class="modal-footer" style="justify-content: flex-end;">
+        <button class="secondary" onclick="clearGlobalCanvas()" style="width: auto; margin: 0;">清除重畫</button>
+        <button class="secondary" onclick="closeSignatureModal()" style="width: auto; margin: 0;">取消</button>
+        <button class="primary" onclick="confirmSignature()" style="width: auto; margin: 0;">確定簽名</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // 雙棲環境防禦 API 通道 (支援 Local, GitHub 與 GAS 原生)
+    // ==========================================
+    
+    // ⚠️ 請將這裡替換成你最新的 GAS 網頁應用程式網址 (結尾是 /exec)
+    var GAS_WEB_URL = 'https://script.google.com/macros/s/AKfycbx4IM_q8urF7echSHhKh_bJuluIR6Vng2391gORich8ttOWr8wN-HJgaMCrrXV7DDYhrA/exec'; 
+
+    function apiCall(funcName, args, onSuccess, onFailure) {
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        var runner = google.script.run;
+        if (onSuccess) {
+          runner = runner.withSuccessHandler(function(res){
+            if (res && res.status === 'success') onSuccess(res.data);
+            else if (onFailure) onFailure(res ? res.error : '伺服器發生未知錯誤');
+          });
         }
-        
-        detailsHtml += `</div>
-          <button class="btn-secondary" style="width: 100%; border: 1px dashed var(--text-muted); margin-top: 12px; background: transparent; color: var(--text-secondary);" onclick="toggleAddCustomNodeInline('${activeData.name}')">
-            <i data-lucide="plus" style="width:16px; height:16px;"></i> 新增細項任務至此節點
-          </button>
-        `;
-
-        detailsHtml += `
-          <hr class="divider" style="margin: 24px 0 16px 0;" />
-          <h3 style="font-size: 14px; margin-bottom: 12px; display:flex; align-items:center; gap:6px;">
-            <i data-lucide="list-tree" style="width:16px; height:16px; color:var(--text-secondary);"></i> 專案全局歷史日誌總覽
-          </h3>
-        `;
-        
-        let projectLogs = [];
-        if (project.workLog && Array.isArray(project.workLog)) {
-            projectLogs = project.workLog.filter(l => l.logContent && l.logContent.trim() !== "");
-            projectLogs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)); 
+        if (onFailure) {
+          runner = runner.withFailureHandler(function(err){ onFailure(err.message || err); });
         }
+        runner[funcName].apply(runner, args);
+      } else {
+        fetch(GAS_WEB_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify({ func: funcName, args: args })
+        }).then(function(r){ return r.json(); }).then(function(res){
+          if (res.status === 'success' && onSuccess) onSuccess(res.data);
+          else if (onFailure) onFailure(res.error || '伺服器發生未知錯誤');
+        }).catch(function(err){
+          if (onFailure) onFailure(err.message || err);
+        });
+      }
+    }
+    
+    var globalContractData = {}; var autoSaveTimeout = null;
+    var currentSubtotal = 0; var currentTax = 0; var currentOriginalTotal = 0; var currentTotal = 0;
+    var editCurrentSubtotal = 0; var editCurrentTax = 0; var editCurrentOriginalTotal = 0; var editCurrentTotal = 0;
+    var globalHistoryData = []; 
+    var typeOrder = ["單次服務", "訂閱服務", "顧問服務"];
+
+    var globalTodayStr = "";
+    var globalTomorrowStr = "";
+    
+    // 獨立簽名系統變數
+    var currentSigMode = ''; 
+    var newSignatureDataUrl = '';
+    var editSignatureDataUrl = '';
+
+    // 防碰撞標記：用來記錄系統服務清單是否已經載入完畢
+    var globalIsServiceLoaded = false;
+
+    window.onload = function() { 
+      updateGlobalDates(); 
+      loadSystemData(); loadAutoSaveState(); renderDraftDropdowns(); 
+      setupGlobalCanvas();
+    };
+
+    function updateGlobalDates() {
+      var today = new Date();
+      globalTodayStr = String(today.getMonth() + 1).padStart(2, '0') + '/' + String(today.getDate()).padStart(2, '0');
+      var tomorrow = new Date(); tomorrow.setDate(tomorrow.getDate() + 1);
+      globalTomorrowStr = String(tomorrow.getMonth() + 1).padStart(2, '0') + '/' + String(tomorrow.getDate()).padStart(2, '0');
+    }
+
+    function showToast(message) {
+      var container = document.getElementById('toast-container');
+      var toast = document.createElement('div'); toast.className = 'toast'; toast.innerText = message; container.appendChild(toast);
+      setTimeout(function() { toast.style.opacity = '0'; toast.style.transform = 'translateY(-20px)'; setTimeout(function(){ toast.remove(); }, 300); }, 3000);
+    }
+    function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
+    function switchPage(pageId, navElement) {
+      document.querySelectorAll('.page, .nav-item').forEach(function(el){ el.classList.remove('active'); });
+      document.getElementById('page-' + pageId).classList.add('active'); navElement.classList.add('active'); window.scrollTo(0, 0);
+      if (window.innerWidth <= 768) toggleSidebar();
+    }
+
+    // ================== 1. 設置與報價模組 ==================
+    function loadSystemData() { 
+      apiCall('getContractItems', [], function(items){ 
+        globalContractData = items; 
+        renderSetupAccordion(globalContractData); 
+        renderQuoteList(globalContractData); 
+        restoreClientCheckboxes(); 
+      }); 
+    }
+    
+    function renderSetupAccordion(items) { 
+      var container = document.getElementById('existing-services-container'); container.innerHTML = ""; 
+      var sortedTypes = Object.keys(items).sort(function(a, b){ var idxA=typeOrder.indexOf(a); var idxB=typeOrder.indexOf(b); return (idxA===-1?999:idxA) - (idxB===-1?999:idxB); });
+      sortedTypes.forEach(function(type) {
+        container.insertAdjacentHTML('beforeend', '<div class="category-title">' + type + '</div>');
+        var sortedServices = Object.keys(items[type]).sort(function(a, b){ return a.localeCompare(b, 'zh-TW'); });
+        sortedServices.forEach(function(service) {
+          var sData = items[type][service]; 
+          var htmlParts = [];
+          htmlParts.push('<details class="accordion-group"><summary class="accordion-header"><div class="summary-left"><span>' + service + ' ($' + Number(sData.price).toLocaleString() + (type==='訂閱服務'?'/月':'') + ')</span></div><div class="summary-right"></div></summary><div class="details-content">');
+          htmlParts.push('<label style="margin-top:0;">服務類型</label><select class="edit-type">');
+          htmlParts.push('<option value="單次服務" ' + (type==='單次服務'?'selected':'') + '>單次服務</option>');
+          htmlParts.push('<option value="訂閱服務" ' + (type==='訂閱服務'?'selected':'') + '>訂閱服務</option>');
+          htmlParts.push('<option value="顧問服務" ' + (type==='顧問服務'?'selected':'') + '>顧問服務</option></select>');
+          htmlParts.push('<label>服務項目名稱</label><input type="text" class="edit-service" value="' + service + '">');
+          htmlParts.push('<label>報價細項</label><textarea class="edit-details" rows="5">' + sData.details.join('\n') + '</textarea>');
+          
+          htmlParts.push('<div style="display:flex; gap:12px; margin-top:20px;">');
+          htmlParts.push('<div style="flex:1;"><label style="margin-top:0;">未稅報價 ' + (type==='訂閱服務'?'(每月)':'') + '</label><input type="number" class="edit-price" value="' + sData.price + '"></div>');
+          htmlParts.push('<div style="flex:1;"><label style="margin-top:0;">預設月份數 ' + (type==='訂閱服務'?'':'(非訂閱請填1)') + '</label><input type="number" class="edit-months" value="' + (sData.defaultMonths || 1) + '"></div>');
+          htmlParts.push('</div>');
+
+          htmlParts.push('<label>約定條款</label><textarea class="edit-terms" rows="5">' + sData.terms + '</textarea>');
+          htmlParts.push('<button class="secondary" onclick="updateExistingSetup(this, \'' + service + '\')">確認更新</button></div></details>');
+          container.insertAdjacentHTML('beforeend', htmlParts.join('')); 
+        });
+      });
+    }
+
+    function renderQuoteList(items) { 
+      var listDiv = document.getElementById('service-list'); listDiv.innerHTML = ""; 
+      var sortedTypes = Object.keys(items).sort(function(a, b) { var idxA=typeOrder.indexOf(a); var idxB=typeOrder.indexOf(b); return (idxA===-1?999:idxA) - (idxB===-1?999:idxB); });
+      sortedTypes.forEach(function(type) {
+        listDiv.insertAdjacentHTML('beforeend', '<div class="category-title">' + type + '</div>');
+        var sortedServices = Object.keys(items[type]).sort(function(a, b){ return a.localeCompare(b, 'zh-TW'); });
+        sortedServices.forEach(function(service) {
+          var sData = items[type][service]; 
+          var group = document.createElement('details'); group.className = "accordion-group"; 
+          var isSub = (type === '訂閱服務');
+          var htmlParts = [];
+          
+          htmlParts.push('<summary class="accordion-header"><div class="summary-left">');
+          htmlParts.push('<input type="checkbox" onchange="toggleQuoteChildren(this)" onclick="event.stopPropagation()" data-type="' + type + '" data-service="' + service + '" data-price="' + sData.price + '" value="' + service + '">');
+          htmlParts.push('<span>' + service + ' (預設 $' + Number(sData.price).toLocaleString() + (isSub?'/月':'') + ')</span></div><div class="summary-right"></div></summary>');
+          htmlParts.push('<div class="details-content">');
+          
+          htmlParts.push('<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); display:flex; align-items:center; flex-wrap:wrap; gap:10px;">');
+          htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">' + (isSub ? '每月報價：' : '獨立服務報價：') + '</label>');
+          htmlParts.push('<div style="position:relative; display:inline-block; max-width:150px;">');
+          htmlParts.push('<span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:15px; font-weight:500;">$</span>');
+          htmlParts.push('<input type="number" class="service-price-input" data-service="' + service + '" value="' + sData.price + '" style="width:100%; padding-left:26px; margin:0; font-weight:600;" oninput="calcTotal(); autoSaveClient();">');
+          htmlParts.push('</div>');
+          
+          if (isSub) {
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">x</label>');
+            htmlParts.push('<input type="number" class="service-months-input" value="' + (sData.defaultMonths || 1) + '" style="width:80px; margin:0; font-weight:600; text-align:center;" oninput="calcTotal(); autoSaveClient();">');
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">個月</label>');
+          }
+          htmlParts.push('</div>');
+
+          sData.details.forEach(function(detail) { 
+            htmlParts.push('<label class="tree-child"><input type="checkbox" class="child-box" onchange="calcTotal(); autoSaveClient();" value="[' + service + '] ' + detail + '"><span style="color:var(--text-main); font-weight:400;">' + detail + '</span></label>'); 
+          }); 
+          
+          htmlParts.push('</div>'); 
+          group.innerHTML = htmlParts.join(''); 
+          listDiv.appendChild(group); 
+        });
+      });
+      globalIsServiceLoaded = true;
+    }
+
+    function updateExistingSetup(btn, oldName) {
+      var detailsEl = btn.closest('details'); var contentDiv = btn.closest('.details-content');
+      var data = { 
+        type: contentDiv.querySelector('.edit-type').value, 
+        service: contentDiv.querySelector('.edit-service').value, 
+        details: contentDiv.querySelector('.edit-details').value, 
+        price: contentDiv.querySelector('.edit-price').value, 
+        defaultMonths: contentDiv.querySelector('.edit-months').value,
+        terms: contentDiv.querySelector('.edit-terms').value 
+      };
+      
+      if(oldName !== data.service) {
+        globalContractData[data.type][data.service] = globalContractData[data.type][oldName];
+        delete globalContractData[data.type][oldName];
+      }
+      globalContractData[data.type][data.service].details = data.details.split('\n').map(function(x){ return x.trim(); }).filter(String);
+      globalContractData[data.type][data.service].price = data.price;
+      globalContractData[data.type][data.service].defaultMonths = data.defaultMonths;
+      globalContractData[data.type][data.service].terms = data.terms;
+      
+      btn.setAttribute('onclick', 'updateExistingSetup(this, \'' + data.service + '\')');
+      var sumSpan = detailsEl.querySelector('.summary-left span');
+      sumSpan.innerText = data.service + ' ($' + Number(data.price).toLocaleString() + (data.type==='訂閱服務'?'/月':'') + ')';
+      renderQuoteList(globalContractData);
+      showToast("設定已更新");
+
+      apiCall('updateContractItem', [oldName, data], function(res){}, function(err){ showToast('背景同步失敗，請重新整理網頁'); });
+    }
+
+    function saveSetup() {
+      var data = { 
+        type: document.getElementById('setup-type').value, 
+        service: document.getElementById('setup-service').value, 
+        details: document.getElementById('setup-details').value, 
+        price: document.getElementById('setup-price').value, 
+        defaultMonths: document.getElementById('setup-months').value || 1,
+        terms: document.getElementById('setup-terms').value 
+      };
+      if (!data.service) return showToast('請填寫服務名稱'); 
+      
+      if(!globalContractData[data.type]) globalContractData[data.type] = {};
+      globalContractData[data.type][data.service] = {
+         details: data.details.split('\n').map(function(x){ return x.trim(); }).filter(String),
+         price: data.price,
+         defaultMonths: data.defaultMonths,
+         terms: data.terms
+      };
+      
+      renderSetupAccordion(globalContractData);
+      renderQuoteList(globalContractData);
+      
+      document.getElementById('setup-service').value=''; 
+      document.getElementById('setup-details').value=''; 
+      document.getElementById('setup-price').value=''; 
+      document.getElementById('setup-months').value='1'; 
+      document.getElementById('setup-terms').value=''; 
+      localStorage.removeItem('ruby_setup_autosave');
+      showToast('項目已更新並新增至列表');
+
+      apiCall('saveContractItemSetup', [data], function(res){});
+    }
+    
+    function generateSetupAI_Terms() {
+      var sName = document.getElementById('setup-service').value; var sDet = document.getElementById('setup-details').value; if (!sName || !sDet) return showToast("請先填寫名稱與細項"); showToast("AI 撰寫中...");
+      apiCall('generateSetupTermsWithGemini', [sName, sDet], function(res){ document.getElementById('setup-terms').value = res; showToast("完成"); }, function(err){ showToast(err); });
+    }
+
+    function toggleQuoteChildren(parentCb) { var group = parentCb.closest('details.accordion-group'); group.querySelectorAll('.child-box').forEach(function(box){ box.checked = parentCb.checked; }); calcTotal(); autoSaveClient(); }
+    
+    function calcTotal() { 
+      currentSubtotal = 0; var combinedTerms = ""; 
+      document.querySelectorAll('#service-list details.accordion-group .summary-left input[type="checkbox"]:checked').forEach(function(box) { 
+        var group = box.closest('details.accordion-group');
+        var priceInput = group.querySelector('.service-price-input');
+        var monthsInput = group.querySelector('.service-months-input');
         
-        if (projectLogs.length === 0) {
-            detailsHtml += `<div style="text-align:center; padding: 24px; color:var(--text-muted); font-size:13px; background:var(--bg-card); border-radius:8px;">目前無任何日誌紀錄</div>`;
-        } else {
-            detailsHtml += `<div style="display:flex; flex-direction:column; gap: 12px;">`;
-            projectLogs.forEach((l, i) => {
-                const isSystem = l.isSystem;
-                const d = new Date(l.timestamp);
-                const formattedDate = `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-                
-                let actionButtons = '';
-                const editLogId = `inline-edit-hist-log-${i}`;
+        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+        
+        currentSubtotal += (basePrice * months); 
+        
+        var type = box.getAttribute('data-type');
+        var service = box.getAttribute('data-service');
+        if (globalContractData[type] && globalContractData[type][service]) {
+          var sTerms = globalContractData[type][service].terms; 
+          if (sTerms) combinedTerms += '【' + service + '】\n' + sTerms + '\n\n'; 
+        }
+      }); 
+      
+      currentTax = Math.round(currentSubtotal * 0.05); 
+      currentOriginalTotal = currentSubtotal + currentTax; 
+      var discount = parseInt(document.getElementById('client-custom-price').value) || 0;
+      currentTotal = currentOriginalTotal - discount; 
+      
+      document.getElementById('text-subtotal').innerText = currentSubtotal.toLocaleString(); 
+      document.getElementById('text-tax').innerText = currentTax.toLocaleString(); 
+      if(document.getElementById('text-original-total')) document.getElementById('text-original-total').innerText = currentOriginalTotal.toLocaleString();
+      document.getElementById('text-total').innerText = currentTotal.toLocaleString(); 
+      document.getElementById('client-terms').value = combinedTerms.trim(); 
+    }
 
-                if (!isSystem) {
-                   const encodedContent = encodeURIComponent(l.logContent);
-                   actionButtons = `
-                     <div style="display:flex; gap:4px; opacity: 0.6;">
-                        <button class="btn-icon ghost" title="修改日誌" onclick="toggleInlinePanel('${editLogId}')">
-                            <i data-lucide="edit-2" style="width:14px; height:14px;"></i>
-                        </button>
-                        <button class="btn-icon ghost danger" title="刪除日誌" onclick="confirmDeleteLog('${project.projectId}', '${project._rowId}', '${project.sheetType}', '${l.timestamp}')">
-                            <i data-lucide="trash-2" style="width:14px; height:14px;"></i>
-                        </button>
-                     </div>
-                   `;
-                }
+    function clearNewClientForm() {
+      if(!confirm('確定要清空所有欄位與目前的自動儲存草稿嗎？此動作無法復原。')) return;
+      
+      document.getElementById('client-taxId').value = '';
+      document.getElementById('client-company').value = '';
+      document.getElementById('client-rep').value = '';
+      document.getElementById('client-contact').value = '';
+      document.getElementById('client-phone').value = '';
+      document.getElementById('client-email').value = '';
+      document.getElementById('client-address').value = '';
+      document.getElementById('client-custom-price').value = '';
+      document.getElementById('client-terms').value = '';
 
-                detailsHtml += `
-                  <div class="card-mono" style="padding: 12px; background: ${isSystem ? 'var(--bg-card)' : '#FFFFFF'};">
-                     <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 6px;">
-                        <div>
-                            <span style="font-weight:600; font-size:13px; color:${isSystem ? 'var(--text-secondary)' : 'var(--text-main)'};">${l.taskName}</span>
-                            <span class="caption" style="color:var(--text-muted); margin-left:8px;">${formattedDate}</span>
-                        </div>
-                        ${actionButtons}
-                     </div>
-                     <div style="font-size:13px; color:${isSystem ? 'var(--text-muted)' : 'var(--text-secondary)'}; line-height: 1.5;">${l.logContent}</div>
-                     ${!isSystem ? `<div class="caption" style="margin-top:8px; display:flex; align-items:center; gap:4px; color:var(--text-muted);"><i data-lucide="clock" style="width:12px; height:12px;"></i> 工時: ${l.duration} hr</div>` : ''}
-                  </div>
-                  
-                  ${!isSystem ? `
-                  <div id="${editLogId}" class="inline-action-panel card-mono" style="display:none; margin-top:-8px; border-top:none; border-radius:0 0 8px 8px; background:#fff; border-color:var(--border-light);">
-                     <textarea id="hist-log-text-${i}" class="input-field" style="min-height:60px; margin-bottom:8px;">${l.logContent}</textarea>
-                     <div style="display:flex; justify-content:space-between; align-items:center;">
-                        <input type="number" id="hist-log-dur-${i}" class="input-field" step="0.25" min="0" value="${l.duration}" style="width:80px; height:32px;">
-                        <div style="display:flex; gap:8px;">
-                           <button class="btn-secondary" style="height:32px;" onclick="toggleInlinePanel('${editLogId}')">取消</button>
-                           <button class="btn-primary" style="height:32px;" onclick="submitEditLog('${project.projectId}', '${project._rowId}', '${project.sheetType}', '${l.timestamp}', 'hist-log-text-${i}', 'hist-log-dur-${i}')">更新</button>
-                        </div>
-                     </div>
-                  </div>` : ''}
-                `;
-            });
-            detailsHtml += `</div>`;
+      document.querySelectorAll('#service-list input[type="checkbox"]').forEach(function(box){ 
+        box.checked = false; 
+      });
+      document.querySelectorAll('#service-list .service-price-input').forEach(function(input){
+        input.value = input.getAttribute('data-price');
+      });
+
+      newSignatureDataUrl = '';
+      document.getElementById('sig-preview-img').src = '';
+      document.getElementById('sig-preview-container').style.display = 'none';
+
+      calcTotal();
+      localStorage.removeItem('ruby_client_autosave');
+      showToast('表單與暫存草稿已完全清空！');
+    }
+
+    function switchClientTab(mode) { document.getElementById('btn-tab-new').classList.remove('active'); document.getElementById('btn-tab-history').classList.remove('active'); document.getElementById('client-tab-new').style.display = 'none'; document.getElementById('client-tab-history').style.display = 'none'; document.getElementById('btn-tab-'+mode).classList.add('active'); document.getElementById('client-tab-'+mode).style.display = 'block'; if(mode==='history') loadHistoryData(); }
+    
+    function loadHistoryData() { 
+      var tbody = document.getElementById('history-table-body'); 
+      tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">同步中...</td></tr>'; 
+      
+      apiCall('getClientHistory', [], 
+        function(hist) { 
+          globalHistoryData = hist; 
+          renderHistoryTable(globalHistoryData); 
+        }, 
+        function(err) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:#ff3b30; font-weight:500;">載入失敗：' + err + '</td></tr>';
+          showToast('無法取得歷史紀錄：' + err);
+        }
+      ); 
+    }
+
+    function renderHistoryTable(dataToRender) {
+      var tbody = document.getElementById('history-table-body'); 
+      tbody.innerHTML = ''; 
+      if(dataToRender.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; color:var(--text-muted);">無符合的報價紀錄</td></tr>'; 
+        return;
+      }
+      dataToRender.forEach(function(r) { 
+        var summaryNames = r.mainServices || "";
+        if (!summaryNames) {
+            try {
+                var matrix = JSON.parse(r.services);
+                summaryNames = matrix.map(function(m){ return m.name; }).join(', ');
+            } catch(e) {
+                summaryNames = String(r.services).replace(/\n/g, ' '); 
+            }
+        }
+        var safeService = summaryNames.substring(0, 15) + (summaryNames.length > 15 ? "..." : "");
+        
+        var totalStr = r.customPrice ? '$' + Number(r.customPrice).toLocaleString() + ' (優惠)' : '$' + r.total.toLocaleString();
+
+        var htmlArr = [];
+        htmlArr.push('<tr>');
+        htmlArr.push('<td data-label="專案編號">' + r.projectId + '</td>');
+        htmlArr.push('<td data-label="簽約時間">' + r.date + '</td>');
+        htmlArr.push('<td data-label="公司名稱">' + r.company + '</td>');
+        htmlArr.push('<td data-label="服務摘要">' + safeService + '</td>');
+        htmlArr.push('<td data-label="總計">' + totalStr + '</td>');
+        htmlArr.push('<td data-label="操作選項" style="white-space:nowrap;">');
+        htmlArr.push('  <a href="' + r.pdfUrl + '" target="_blank" class="link-btn">檢視 PDF</a>');
+        htmlArr.push('  <button class="secondary-sm" style="margin-left: 12px;" onclick="openEditHistoryModal(\'' + r.projectId + '\')">編輯</button>');
+        htmlArr.push('</td></tr>');
+
+        tbody.insertAdjacentHTML('beforeend', htmlArr.join('')); 
+      });
+    }
+
+    function filterHistory() {
+      var keyword = document.getElementById('history-search').value.toLowerCase();
+      var dateStart = document.getElementById('history-date-start').value;
+      var dateEnd = document.getElementById('history-date-end').value;
+
+      var filtered = globalHistoryData.filter(function(r){
+        var matchKeyword = !keyword || r.projectId.toLowerCase().includes(keyword) || r.company.toLowerCase().includes(keyword) || String(r.services).toLowerCase().includes(keyword);
+        
+        var matchDate = true;
+        if (dateStart || dateEnd) {
+          var rowDate = new Date(r.date.split(' ')[0]); rowDate.setHours(0, 0, 0, 0);
+          if (dateStart) { var sDate = new Date(dateStart); sDate.setHours(0, 0, 0, 0); if (rowDate < sDate) matchDate = false; }
+          if (dateEnd) { var eDate = new Date(dateEnd); eDate.setHours(0, 0, 0, 0); if (rowDate > eDate) matchDate = false; }
         }
 
-        detailContainer.innerHTML = detailsHtml; lucide.createIcons();
+        return matchKeyword && matchDate;
+      });
+      renderHistoryTable(filtered);
+    }
+
+    function clearHistoryFilter() {
+      document.getElementById('history-search').value = ''; 
+      document.getElementById('history-date-start').value = ''; 
+      document.getElementById('history-date-end').value = '';
+      renderHistoryTable(globalHistoryData);
+    }
+
+    function openEditHistoryModal(projectId) {
+      var record = globalHistoryData.find(function(r){ return r.projectId === projectId; });
+      if (!record) return;
+      
+      document.getElementById('edit-modal-title-info').innerText = '- ' + record.company + ' (' + record.projectId + ')';
+      document.getElementById('edit-history-pid').value = record.projectId;
+      document.getElementById('edit-history-rowId').value = record._rowId; 
+      
+      document.getElementById('edit-history-taxId').value = record.taxId || "";
+      document.getElementById('edit-history-company').value = record.company || "";
+      document.getElementById('edit-history-rep').value = record.rep || "";
+      document.getElementById('edit-history-contact').value = record.contact || "";
+      document.getElementById('edit-history-phone').value = record.phone || "";
+      document.getElementById('edit-history-email').value = record.email || "";
+      document.getElementById('edit-history-address').value = record.address || "";
+      
+      var historicalDiscount = "";
+      if (record.customPrice && record.total) {
+        historicalDiscount = Number(record.total) - Number(record.customPrice);
+      }
+      document.getElementById('edit-custom-price').value = historicalDiscount;
+      
+      cancelEditCanvas();
+      
+      renderEditQuoteList(globalContractData, record.services || "");
+      
+      if (record.terms) {
+          document.getElementById('edit-history-terms').value = record.terms;
       }
 
-      function toggleInlinePanel(panelId) {
-          document.querySelectorAll('.inline-action-panel').forEach(el => {
-              if (el.id !== panelId && el.id !== 'inline-add-node-form') el.style.display = 'none';
+      document.getElementById('edit-history-modal').classList.add('show');
+      
+      autoLoadEditDraftIfExist(record.projectId);
+    }
+
+    function closeEditHistoryModal() { document.getElementById('edit-history-modal').classList.remove('show'); }
+
+    function renderEditQuoteList(items, selectedServicesStr) { 
+      var listDiv = document.getElementById('edit-service-list'); 
+      listDiv.innerHTML = ""; 
+      
+      var historyParsed = [];
+      
+      try {
+          historyParsed = JSON.parse(selectedServicesStr);
+      } catch(e) {
+          var currentObj = null;
+          selectedServicesStr.split('\n').forEach(function(line) {
+              var trimmedLine = line.trim();
+              if (trimmedLine.startsWith('- ')) {
+                  if (currentObj) historyParsed.push(currentObj);
+                  var parts = trimmedLine.substring(2).split(' | $');
+                  var rawName = parts[0].trim();
+                  var totalPriceStr = parts[1] ? parts[1].replace(/[^0-9.-]/g, '') : "0";
+                  var totalPrice = parseInt(totalPriceStr, 10) || 0;
+                  var sName = rawName;
+                  var months = 1;
+                  var monthMatch = rawName.match(/(.+?)\s*\(x(\d+)個月\)$/);
+                  if (monthMatch) {
+                      sName = monthMatch[1].trim();
+                      months = parseInt(monthMatch[2], 10);
+                  }
+                  var basePrice = months > 1 ? Math.round(totalPrice / months) : totalPrice;
+                  currentObj = {
+                      name: sName, type: "歷史紀錄", isSub: rawName.includes('/月') || months > 1,
+                      basePrice: basePrice, months: months, totalPrice: totalPrice, details: []
+                  };
+              } else if (trimmedLine !== '' && currentObj) {
+                  var childText = trimmedLine;
+                  if (childText.startsWith('[')) {
+                      var cParts = childText.split('] ');
+                      if (cParts.length > 1) childText = cParts.slice(1).join('] ');
+                  }
+                  currentObj.details.push(childText);
+              }
           });
-          const el = document.getElementById(panelId);
-          if (el) el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+          if (currentObj) historyParsed.push(currentObj);
+      }
+
+      var renderedServices = []; 
+
+      if (historyParsed.length > 0) {
+        listDiv.insertAdjacentHTML('beforeend', '<div class="category-title">前次建檔內容 (還原歷史紀錄)</div>');
+        historyParsed.forEach(function(histItem) {
+          renderedServices.push(histItem.name);
+
+          var group = document.createElement('details');
+          group.className = "accordion-group";
+          group.setAttribute('open', true); // 歷史項目預設展開
+
+          var htmlParts = [];
+          htmlParts.push('<summary class="accordion-header"><div class="summary-left">');
+          htmlParts.push('<input type="checkbox" class="edit-parent-box" onchange="toggleEditQuoteChildren(this)" onclick="event.stopPropagation()" data-type="歷史紀錄" data-issub="' + histItem.isSub + '" data-service="' + histItem.name + '" data-price="' + histItem.basePrice + '" value="' + histItem.name + '" checked>');
+          htmlParts.push('<span>' + histItem.name + '</span></div><div class="summary-right"></div></summary>');
+          htmlParts.push('<div class="details-content">');
+
+          htmlParts.push('<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); display:flex; align-items:center; flex-wrap:wrap; gap:10px;">');
+          htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">' + (histItem.isSub || histItem.months > 1 ? '每月報價：' : '項目報價：') + '</label>');
+          htmlParts.push('<div style="position:relative; display:inline-block; max-width:150px;">');
+          htmlParts.push('<span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:15px; font-weight:500;">$</span>');
+          htmlParts.push('<input type="number" class="edit-service-price-input" data-service="' + histItem.name + '" value="' + histItem.basePrice + '" style="width:100%; padding-left:26px; margin:0; font-weight:600;" oninput="calcEditTotal(); autoSaveEdit();">');
+          htmlParts.push('</div>');
+
+          if (histItem.isSub || histItem.months > 1) {
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">x</label>');
+            htmlParts.push('<input type="number" class="edit-service-months-input" value="' + histItem.months + '" style="width:80px; margin:0; font-weight:600; text-align:center;" oninput="calcEditTotal(); autoSaveEdit();">');
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">個月</label>');
+          }
+          htmlParts.push('</div>');
+
+          histItem.details.forEach(function(childText) {
+            var childVal = '[' + histItem.name + '] ' + childText;
+            htmlParts.push('<label class="tree-child"><input type="checkbox" class="edit-child-box" onchange="calcEditTotal(); autoSaveEdit();" value="' + childVal + '" checked><span style="color:var(--text-main); font-weight:400;">' + childText + '</span></label>');
+          });
+
+          htmlParts.push('</div>');
+          group.innerHTML = htmlParts.join('');
+          listDiv.appendChild(group);
+        });
+      }
+
+      var sortedTypes = Object.keys(items).sort(function(a, b){ var idxA=typeOrder.indexOf(a); var idxB=typeOrder.indexOf(b); return (idxA===-1?999:idxA) - (idxB===-1?999:idxB); }); 
+      
+      sortedTypes.forEach(function(type) {
+        var typeHasNewItems = false;
+        var typeHtmlParts = [];
+        typeHtmlParts.push('<div class="category-title">' + type + ' (可追加新項目)</div>');
+
+        var sortedServices = Object.keys(items[type]).sort(function(a, b){ return a.localeCompare(b, 'zh-TW'); });
+        
+        sortedServices.forEach(function(service) {
+          if (renderedServices.includes(service)) return; 
+          typeHasNewItems = true;
+
+          var sData = items[type][service]; 
+          var isSub = (type === '訂閱服務');
+          
+          var childHtmlParts = [];
+          sData.details.forEach(function(detail) { 
+            var childVal = '[' + service + '] ' + detail;
+            childHtmlParts.push('<label class="tree-child"><input type="checkbox" class="edit-child-box" onchange="calcEditTotal(); autoSaveEdit();" value="' + childVal + '"><span style="color:var(--text-main); font-weight:400;">' + detail + '</span></label>'); 
+          }); 
+          
+          var htmlParts = [];
+          htmlParts.push('<details class="accordion-group">');
+          htmlParts.push('<summary class="accordion-header"><div class="summary-left">');
+          htmlParts.push('<input type="checkbox" class="edit-parent-box" onchange="toggleEditQuoteChildren(this)" onclick="event.stopPropagation()" data-type="' + type + '" data-service="' + service + '" data-price="' + sData.price + '" value="' + service + '">');
+          htmlParts.push('<span>' + service + ' (預設 $' + Number(sData.price).toLocaleString() + (isSub?'/月':'') + ')</span></div><div class="summary-right"></div></summary>');
+          htmlParts.push('<div class="details-content">');
+          
+          htmlParts.push('<div style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--border-color); display:flex; align-items:center; flex-wrap:wrap; gap:10px;">');
+          htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">' + (isSub ? '每月報價：' : '項目報價：') + '</label>');
+          htmlParts.push('<div style="position:relative; display:inline-block; max-width:150px;">');
+          htmlParts.push('<span style="position:absolute; left:12px; top:50%; transform:translateY(-50%); color:var(--text-muted); font-size:15px; font-weight:500;">$</span>');
+          htmlParts.push('<input type="number" class="edit-service-price-input" data-service="' + service + '" value="' + sData.price + '" style="width:100%; padding-left:26px; margin:0; font-weight:600;" oninput="calcEditTotal(); autoSaveEdit();">');
+          htmlParts.push('</div>');
+          
+          if (isSub) {
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">x</label>');
+            htmlParts.push('<input type="number" class="edit-service-months-input" value="' + (sData.defaultMonths || 1) + '" style="width:80px; margin:0; font-weight:600; text-align:center;" oninput="calcEditTotal(); autoSaveEdit();">');
+            htmlParts.push('<label style="margin:0; flex-shrink:0; font-weight:600; color:var(--text-main);">個月</label>');
+          }
+          htmlParts.push('</div>');
+          
+          htmlParts.push(childHtmlParts.join(''));
+          htmlParts.push('</div></details>');
+          
+          typeHtmlParts.push(htmlParts.join('')); 
+        });
+        
+        if (typeHasNewItems) {
+           listDiv.insertAdjacentHTML('beforeend', typeHtmlParts.join(''));
+        }
+      });
+
+      calcEditTotal(); 
+    }
+
+    function toggleEditQuoteChildren(parentCb) { 
+      var group = parentCb.closest('details.accordion-group'); 
+      group.querySelectorAll('.edit-child-box').forEach(function(box){ box.checked = parentCb.checked; }); 
+      calcEditTotal(); 
+      autoSaveEdit();
+    }
+
+    function calcEditTotal() { 
+      editCurrentSubtotal = 0; var combinedTerms = ""; 
+      document.querySelectorAll('#edit-service-list details.accordion-group .summary-left input[type="checkbox"]:checked').forEach(function(box) { 
+        var group = box.closest('details.accordion-group');
+        var priceInput = group.querySelector('.edit-service-price-input');
+        var monthsInput = group.querySelector('.edit-service-months-input');
+        
+        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+
+        editCurrentSubtotal += (basePrice * months); 
+        
+        var type = box.getAttribute('data-type');
+        var service = box.getAttribute('data-service');
+        var sTerms = "";
+
+        if (type === "歷史紀錄") {
+          for (var t in globalContractData) {
+            if (globalContractData[t][service]) {
+               sTerms = globalContractData[t][service].terms;
+               break;
+            }
+          }
+        } else if (globalContractData[type] && globalContractData[type][service]) {
+          sTerms = globalContractData[type][service].terms; 
+        }
+
+        if (sTerms) combinedTerms += '【' + service + '】\n' + sTerms + '\n\n'; 
+      }); 
+      
+      editCurrentTax = Math.round(editCurrentSubtotal * 0.05); 
+      editCurrentOriginalTotal = editCurrentSubtotal + editCurrentTax; 
+      var discount = parseInt(document.getElementById('edit-custom-price').value) || 0;
+      editCurrentTotal = editCurrentOriginalTotal - discount; 
+      
+      document.getElementById('edit-text-subtotal').innerText = editCurrentSubtotal.toLocaleString(); 
+      document.getElementById('edit-text-tax').innerText = editCurrentTax.toLocaleString(); 
+      if(document.getElementById('edit-text-original-total')) document.getElementById('edit-text-original-total').innerText = editCurrentOriginalTotal.toLocaleString();
+      document.getElementById('edit-text-total').innerText = editCurrentTotal.toLocaleString(); 
+      document.getElementById('edit-history-terms').value = combinedTerms.trim(); 
+    }
+
+    // =====================================
+    // 獨立簽名畫板全域系統
+    // =====================================
+    var globalCanvas = document.getElementById('global-signature-pad');
+    var globalCtx = globalCanvas.getContext('2d');
+    var globalCanvasIsDrawn = false;
+
+    function setupGlobalCanvas() {
+      var isDrawing = false;
+      function getPos(e) { var rect = globalCanvas.getBoundingClientRect(); return {x:(e.touches?e.touches[0].clientX:e.clientX)-rect.left, y:(e.touches?e.touches[0].clientY:e.clientY)-rect.top}; }
+      function startDraw(e){ e.preventDefault(); isDrawing=true; var p=getPos(e); globalCtx.beginPath(); globalCtx.moveTo(p.x, p.y); } 
+      function draw(e){ if(!isDrawing) return; e.preventDefault(); var p=getPos(e); globalCtx.lineTo(p.x, p.y); globalCtx.stroke(); globalCanvasIsDrawn = true; } 
+      function endDraw(e){ e.preventDefault(); isDrawing=false; }
+      globalCanvas.addEventListener('mousedown',startDraw); globalCanvas.addEventListener('mousemove',draw); globalCanvas.addEventListener('mouseup',endDraw); globalCanvas.addEventListener('touchstart',startDraw,{passive:false}); globalCanvas.addEventListener('touchmove',draw,{passive:false}); globalCanvas.addEventListener('touchend',endDraw);
+    }
+
+    function resizeGlobalCanvas() { 
+      var ratio = Math.max(window.devicePixelRatio||1, 1); 
+      if (globalCanvas.offsetWidth === 0) return;
+      globalCanvas.width = globalCanvas.offsetWidth * ratio; 
+      globalCanvas.height = globalCanvas.offsetHeight * ratio; 
+      globalCtx.setTransform(ratio, 0, 0, ratio, 0, 0); 
+      globalCtx.lineWidth = 2; globalCtx.lineCap = 'round'; globalCtx.strokeStyle = '#1d1d1f'; 
+    } 
+    window.addEventListener("resize", function() { if(document.getElementById('signature-modal').classList.contains('show')) resizeGlobalCanvas(); });
+
+    function openSignatureModal(mode) {
+      currentSigMode = mode;
+      document.getElementById('signature-modal').classList.add('show');
+      setTimeout(function() { resizeGlobalCanvas(); clearGlobalCanvas(); }, 100);
+    }
+    function closeSignatureModal() { document.getElementById('signature-modal').classList.remove('show'); }
+    function clearGlobalCanvas() { globalCtx.clearRect(0, 0, globalCanvas.width, globalCanvas.height); globalCanvasIsDrawn = false; }
+    
+    function confirmSignature() {
+      if (!globalCanvasIsDrawn) {
+        showToast("尚未繪製簽名"); return;
+      }
+      var sigDataUrl = getTimestampedSignatureDataURL(globalCanvas);
+      if (currentSigMode === 'new') {
+        newSignatureDataUrl = sigDataUrl;
+        document.getElementById('sig-preview-img').src = sigDataUrl;
+        document.getElementById('sig-preview-container').style.display = 'block';
+        autoSaveClient();
+      } else if (currentSigMode === 'edit') {
+        editSignatureDataUrl = sigDataUrl;
+        document.getElementById('edit-sig-preview-img').src = sigDataUrl;
+        document.getElementById('edit-sig-preview-container').style.display = 'block';
+        document.getElementById('edit-sig-placeholder').style.display = 'none';
+        autoSaveEdit();
+      }
+      closeSignatureModal();
+    }
+    
+    function cancelEditCanvas() { 
+      document.getElementById('edit-sig-placeholder').style.display = 'block'; 
+      document.getElementById('edit-sig-preview-container').style.display = 'none'; 
+      editSignatureDataUrl = ''; 
+      autoSaveEdit();
+    }
+
+    function getTimestampedSignatureDataURL(baseCanvas) {
+      if (!baseCanvas || baseCanvas.width === 0 || baseCanvas.height === 0) return ""; 
+      var tempCanvas = document.createElement('canvas');
+      tempCanvas.width = baseCanvas.width;
+      tempCanvas.height = baseCanvas.height;
+      var tempCtx = tempCanvas.getContext('2d');
+      tempCtx.fillStyle = "#ffffff";
+      tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+      tempCtx.drawImage(baseCanvas, 0, 0);
+      var now = new Date();
+      var pad = function(n) { return n < 10 ? '0'+n : n; };
+      var timeStr = now.getFullYear() + '/' + pad(now.getMonth()+1) + '/' + pad(now.getDate()) + ' ' + pad(now.getHours()) + ':' + pad(now.getMinutes()) + ':' + pad(now.getSeconds());
+      tempCtx.font = "14px -apple-system, BlinkMacSystemFont, sans-serif";
+      tempCtx.fillStyle = "#86868b";
+      tempCtx.textAlign = "right";
+      tempCtx.fillText(timeStr, tempCanvas.width - 12, tempCanvas.height - 15);
+      
+      return tempCanvas.toDataURL('image/jpeg', 0.8);
+    }
+
+    // =====================================
+    // A4 排版引擎
+    // =====================================
+    function generateA4HTML(data, quoteId) {
+      var now = new Date();
+      var rocYear = now.getFullYear() - 1911;
+      var rocDate = '中華民國 ' + rocYear + ' 年 ' + (now.getMonth() + 1) + ' 月 ' + now.getDate() + ' 日';
+
+      var servicesMatrix = [];
+      try {
+          servicesMatrix = typeof data.selectedServices === 'string' ? JSON.parse(data.selectedServices) : data.selectedServices;
+      } catch(e) {}
+
+      var modulesHtmlParts = [];
+      if (servicesMatrix && servicesMatrix.length > 0) {
+          servicesMatrix.forEach(function(item) {
+              var priceStr = item.totalPrice > 0 ? '<br><span style="color:#86868b; font-size:13px; font-weight:normal;">本項小計：$' + Number(item.totalPrice).toLocaleString() + '</span>' : '';
+              var detailsHtml = item.details.map(function(d){ return "• " + d; }).join('<br>');
+              
+              var displayName = item.name;
+              if (item.months > 1 || item.isSub) displayName += ' (x' + item.months + '個月)';
+
+              modulesHtmlParts.push('<tr><td><b>' + displayName + '</b>' + priceStr + '</td><td>' + detailsHtml + '</td></tr>');
+          });
+      }
+
+      if (modulesHtmlParts.length === 0) modulesHtmlParts.push('<tr><td colspan="2" style="text-align:center; color:#86868b;">未選擇任何服務</td></tr>');
+      var modulesHtml = modulesHtmlParts.join('');
+
+      var termsHtmlParts = (data.terms||"").split('\n\n').map(function(term) {
+         if(!term.trim()) return '';
+         var lines = term.split('\n');
+         var title = lines[0];
+         var content = lines.slice(1).join('<br>');
+         return '<div style="margin-bottom: 22px;"><h4 style="margin: 5px 0; font-size: 15px;">' + title + '</h4><div style="padding-left: 15px; margin-bottom: 6px; text-align: justify; font-size: 14px; color: #1d1d1f; line-height: 1.8;">' + content + '</div></div>';
+      });
+      var termsHtml = termsHtmlParts.join('');
+
+      var sigImg = data.signature ? '<img src="' + data.signature + '" style="max-width:180px; border-bottom:1px solid #1d1d1f; padding-bottom:5px;" />' : '<div style="color:#86868b; font-size:12px; margin-top:20px;">(尚未簽名)</div>';
+      
+      var logoUrl = "https://lh3.googleusercontent.com/d/1CZhgHD5CpNuq3XaNbjGeo7duE3wTBx2s";
+      var sealUrl = "https://lh3.googleusercontent.com/d/1hG263SkChV9X5ynCEwoFgt--NPUPCdmZ";
+
+      var priceDisplayHtml = "";
+      if (data.customPrice) {
+          priceDisplayHtml = '<h3 style="margin: 0; font-weight: 400; border: none; padding: 0; font-size: 15px; text-decoration: line-through; color: #86868b;">原總金額：$ ' + data.total.toLocaleString() + '</h3>' +
+                             '<h3 style="margin: 5px 0 0 0; font-weight: 600; border: none; padding: 0; font-size: 20px; color: #ff3b30;">專案優惠價：$ ' + Number(data.customPrice).toLocaleString() + '</h3>';
+      } else {
+          priceDisplayHtml = '<h3 style="margin: 0; font-weight: 600; border: none; padding: 0; font-size: 18px;">總金額 (含稅)：$ ' + data.total.toLocaleString() + '</h3>';
+      }
+
+      var htmlDoc = [];
+      htmlDoc.push('<style>');
+      htmlDoc.push('  .a4-preview-page { width: 100%; max-width: 210mm; background: white; margin: 0 auto 30px; padding: 10mm; color: #1d1d1f; font-size: 14px; box-sizing: border-box; line-height: 1.6; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; position: relative; }');
+      htmlDoc.push('  .a4-preview-page h2 { text-align: center; font-size: 24px; border-bottom: 2px solid #1d1d1f; padding-bottom: 12px; margin-bottom: 24px; letter-spacing: 2px;}');
+      htmlDoc.push('  .a4-preview-page h3 { font-size: 16px; border-bottom: 1px solid #d2d2d7; padding-bottom: 6px; margin-top: 25px; margin-bottom: 15px;}');
+      htmlDoc.push('  .a4-preview-page table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; word-wrap: break-word;}');
+      htmlDoc.push('  .a4-preview-page th, .a4-preview-page td { border: 1px solid #c6c6c8; padding: 12px; text-align: left; vertical-align: top;}');
+      htmlDoc.push('  .a4-preview-page th { background: #f5f5f7; font-weight: bold; border-bottom: 2px solid #86868b; color: #1d1d1f;}');
+      htmlDoc.push('  .party-block { border: 2px solid #1d1d1f; padding: 30px; margin-bottom: 40px; border-radius: 4px; page-break-inside: avoid; }');
+      htmlDoc.push('  .party-title { font-size: 18px; font-weight: bold; border-bottom: 2px solid #1d1d1f; padding-bottom: 10px; margin-bottom: 20px; color: #1d1d1f; }');
+      htmlDoc.push('</style>');
+      
+      htmlDoc.push('<div class="a4-preview-page">');
+      htmlDoc.push('  <div style="position: absolute; top: 15mm; right: 20mm; font-size: 13px; color: #86868b; font-family: monospace;">單號：' + (quoteId || '尚未產生') + '</div>');
+      htmlDoc.push('  <div style="text-align: center; margin-bottom: 20px;"><img src="' + logoUrl + '" alt="露比設計" style="max-height: 70px; object-fit: contain;"></div>');
+      htmlDoc.push('  <h2 style="margin-top: 0;">露比設計｜專案報價與服務協議</h2>');
+      htmlDoc.push('  <table style="width: 100%; border: none; margin-bottom: 24px; table-layout: fixed; border-spacing: 0;"><tr>');
+      htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
+      htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">甲方 (委託方)</b><br>');
+      htmlDoc.push('      <b>公司名：</b>' + (data.company || '(未提供)') + '<br><b>統編：</b>' + (data.taxId || '(未提供)') + '<br><b>地址：</b>' + (data.address||'(未提供)').replace(/\n/g, '<br>') + '<br><b>聯繫人：</b>' + (data.contact || ''));
+      htmlDoc.push('    </td><td style="border: none; width: 4%;"></td>');
+      htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
+      htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">乙方 (執行方)</b><br>');
+      htmlDoc.push('      <b>公司名稱：</b>露比設計有限公司<br><b>統編：</b>89190593<br><b>代表人：</b>廖怡甄<br><b>聯絡電話：</b>0909-824-134<br><b>地址：</b>臺中市西區民龍里臺灣大道二段375號12樓之1<br><b>Email：</b>ruby.brand.design@gmail.com');
+      htmlDoc.push('    </td></tr></table>');
+      htmlDoc.push('  <h3>一、 服務項目與規格大綱</h3>');
+      htmlDoc.push('  <table><tr><th width="35%">項目名稱</th><th>細項說明</th></tr>' + modulesHtml + '</table>');
+      htmlDoc.push('  <h3>二、 專案費用明細</h3>');
+      htmlDoc.push('  <div style="background-color: #f5f5f7; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: right; border: 1px solid #E5E5EA;">');
+      htmlDoc.push('    <p style="margin: 0 0 10px 0; font-size: 14px;">銷售額合計 (未稅)：$ ' + data.subtotal.toLocaleString() + '</p>');
+      htmlDoc.push('    <p style="margin: 0 0 10px 0; font-size: 14px;">營業稅 (5%)：$ ' + data.tax.toLocaleString() + '</p>');
+      htmlDoc.push('    ' + priceDisplayHtml);
+      htmlDoc.push('  </div>');
+      htmlDoc.push('  <div style="margin-top: 20px; margin-bottom: 40px; font-size: 13px; line-height: 1.8; color: #1d1d1f; border-left: 4px solid #1d1d1f; padding-left: 15px;">');
+      htmlDoc.push('    <b style="font-size: 15px; display: block; margin-bottom: 8px;">【 專案付款與啟動說明 】</b>');
+      htmlDoc.push('    <p style="text-align: justify; margin: 0 0 10px 0;">本專案採全額付款後正式啟動製作流程。付款完成即代表雙方合作成立，並保留專案檔期與設計資源配置。由於品牌識別設計屬客製化策略與創意服務，一旦啟動即投入專屬時間與腦力成本，因此恕不接受分期製作或未付款先行提案。我們珍惜每一個品牌的打造過程，也以完整投入確保最好的成果。</p>');
+      htmlDoc.push('    <p style="margin: 0; color: #86868b;">＊本公司依匯款完成先後順序排入設計行程，急件費另計。<br>＊製作及完成時間依每一項目而不同。<br>＊後續聯繫及進度查詢請加入官方LINE：@ruby_design</p>');
+      htmlDoc.push('  </div>');
+      htmlDoc.push('  <h2 style="border:none; text-align:left; font-size: 18px; border-bottom: 2px solid #000; margin-top: 50px;">三、 專業約定條款</h2>');
+      htmlDoc.push('  <div style="margin-top: 20px; margin-bottom: 40px;">' + termsHtml + '</div>');
+      htmlDoc.push('  <h2 style="border:none; text-align:left; font-size: 18px; border-bottom: 2px solid #000; margin-top: 50px;">四、 雙方簽署確認</h2>');
+      htmlDoc.push('  <p style="text-align: justify; margin-bottom: 30px; margin-top: 15px;">本協議經雙方確認並簽署後正式生效。雙方同意以電子簽章或數位紀錄形式留存，具同等法律效力。</p>');
+      
+      htmlDoc.push('  <div class="party-block"><div class="party-title">甲方 (委託方) 簽署區</div>');
+      htmlDoc.push('    <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;"><tr>');
+      htmlDoc.push('      <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 45%; font-size: 14px;">');
+      htmlDoc.push('        <b>公司名：</b>' + (data.company || '') + '<br><b>統編：</b>' + (data.taxId || '') + '<br><b>代表人：</b>' + (data.rep || '') + '<br><b>聯繫人：</b>' + (data.contact || '') + '<br><b>電話：</b>' + (data.phone || '') + '<br><b>地址：</b>' + (data.address||'').replace(/\n/g, '<br>'));
+      htmlDoc.push('      </td><td style="border: none; padding: 0; text-align: right; vertical-align: bottom; width: 55%;">' + sigImg + '</td>');
+      htmlDoc.push('    </tr></table></div>');
+
+      htmlDoc.push('  <div class="party-block"><div class="party-title">乙方 (執行方) 簽署區</div>');
+      htmlDoc.push('    <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;"><tr>');
+      htmlDoc.push('      <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 45%; font-size: 14px;">');
+      htmlDoc.push('        <b>公司名稱：</b>露比設計有限公司<br><b>統編：</b>89190593<br><b>代表人：</b>廖怡甄');
+      htmlDoc.push('      </td><td style="border: none; padding: 0; text-align: right; vertical-align: bottom; width: 55%;">');
+      htmlDoc.push('        <img src="' + sealUrl + '" style="width: 100%; max-width: 300px; height: auto; object-fit: contain; margin-right: 5px; margin-bottom: -10px;">');
+      htmlDoc.push('      </td></tr></table></div>');
+      
+      htmlDoc.push('  <div style="text-align: center; margin-top: 40px; font-size: 18px; font-weight: bold; letter-spacing: 2px;">簽署日期： ' + rocDate + '</div>');
+      
+      htmlDoc.push('  <div style="margin-top: 40px; padding: 20px; background-color: #f8f9fa; border: 1px solid #e5e5ea; border-radius: 8px; font-size: 13px; line-height: 1.8; color: #1d1d1f; page-break-inside: avoid;">');
+      htmlDoc.push('    <b style="font-size: 15px; display: block; margin-bottom: 8px;">▍ 匯款資訊</b>');
+      htmlDoc.push('    <b>匯款帳號：</b>露比設計有限公司<br><b>銀行代碼：</b>013 國泰世華<br><b>帳號：</b>232035008151<br>');
+      htmlDoc.push('    <span style="color: #86868b; font-size: 12px;">＊滿萬可提供 刷卡/零卡分期</span><br><b style="display:inline-block; margin-top:6px;">官方 Line：</b>@ruby_design');
+      htmlDoc.push('  </div></div>');
+
+      return htmlDoc.join('');
+    }
+
+    // =====================================
+    // 儲存進度模組
+    // =====================================
+    function autoSaveEdit() { triggerAutoSaveUI('edit-draft-status'); }
+
+    function saveEditDraft() {
+      var pid = document.getElementById('edit-history-pid').value;
+      if (!pid) return;
+      var checkedItems = []; 
+      document.querySelectorAll('#edit-service-list input[type="checkbox"]:checked').forEach(function(box) { checkedItems.push(box.value); }); 
+      
+      var customItemPrices = {};
+      document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input) {
+          customItemPrices[input.getAttribute('data-service')] = input.value;
+      });
+
+      var data = { 
+        company: document.getElementById('edit-history-company').value, taxId: document.getElementById('edit-history-taxId').value, 
+        rep: document.getElementById('edit-history-rep').value, contact: document.getElementById('edit-history-contact').value, 
+        phone: document.getElementById('edit-history-phone').value, email: document.getElementById('edit-history-email').value, 
+        address: document.getElementById('edit-history-address').value, terms: document.getElementById('edit-history-terms').value, 
+        customPrice: document.getElementById('edit-custom-price').value,
+        customItemPrices: customItemPrices,
+        checkedItems: checkedItems, signature: editSignatureDataUrl
+      }; 
+      
+      try {
+        localStorage.setItem('ruby_edit_draft_' + pid, JSON.stringify(data)); 
+        showToast('此專案的編輯進度已儲存'); 
+        document.getElementById('edit-draft-status').innerText = '已手動儲存';
+        triggerAutoSaveUI('edit-draft-status');
+      } catch (e) {
+        showToast('本機儲存空間已滿，請清除部分草稿再試！');
+      }
+    }
+
+    function loadEditDraft() {
+      var pid = document.getElementById('edit-history-pid').value;
+      if (!pid) return;
+      var draftJson = localStorage.getItem('ruby_edit_draft_' + pid);
+      if (!draftJson) return showToast('無此專案的草稿');
+      try {
+        var draft = JSON.parse(draftJson);
+        document.getElementById('edit-history-company').value = draft.company || '';
+        document.getElementById('edit-history-taxId').value = draft.taxId || '';
+        document.getElementById('edit-history-rep').value = draft.rep || '';
+        document.getElementById('edit-history-contact').value = draft.contact || '';
+        document.getElementById('edit-history-phone').value = draft.phone || '';
+        document.getElementById('edit-history-email').value = draft.email || '';
+        document.getElementById('edit-history-address').value = draft.address || '';
+        document.getElementById('edit-history-terms').value = draft.terms || '';
+        if (draft.customPrice !== undefined) document.getElementById('edit-custom-price').value = draft.customPrice;
+
+        if (draft.customItemPrices) {
+          document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input) {
+            var sName = input.getAttribute('data-service');
+            if (draft.customItemPrices[sName] !== undefined) {
+              input.value = draft.customItemPrices[sName];
+            }
+          });
+        }
+
+        if (draft.checkedItems) { 
+          document.querySelectorAll('#edit-service-list input[type="checkbox"]').forEach(function(box) { 
+            box.checked = draft.checkedItems.includes(box.value);
+          }); 
+        } 
+        
+        calcEditTotal(); 
+
+        if (draft.signature) {
+          editSignatureDataUrl = draft.signature;
+          document.getElementById('edit-sig-preview-img').src = draft.signature;
+          document.getElementById('edit-sig-preview-container').style.display = 'block';
+          document.getElementById('edit-sig-placeholder').style.display = 'none';
+        }
+
+        showToast('已載入編輯草稿');
+      } catch (e) {}
+    }
+
+    function autoLoadEditDraftIfExist(pid) {
+      var draftJson = localStorage.getItem('ruby_edit_draft_' + pid);
+      if (draftJson) {
+        showToast('偵測到此專案的未完成草稿，點擊上方【載入草稿】即可還原');
+      }
+    }
+
+    // =====================================
+    // 提交與排版預覽
+    // =====================================
+    function submitEditHistory() {
+      var pid = document.getElementById('edit-history-pid').value;
+      var rowId = document.getElementById('edit-history-rowId').value;
+      var newCompany = document.getElementById('edit-history-company').value;
+      if (!newCompany) return showToast("請確認公司名稱。");
+      
+      var servicesMatrix = [];
+      var selNames = []; 
+      
+      document.querySelectorAll('#edit-service-list details.accordion-group .summary-left input:checked').forEach(function(box) { 
+        var group = box.closest('details.accordion-group');
+        var priceInput = group.querySelector('.edit-service-price-input');
+        var monthsInput = group.querySelector('.edit-service-months-input');
+        
+        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+        
+        var serviceName = box.value;
+        var type = box.getAttribute('data-type');
+        var isSub = (type === '訂閱服務') || box.getAttribute('data-issub') === 'true';
+
+        selNames.push(serviceName); 
+
+        var detailsArr = [];
+        group.querySelectorAll('.edit-child-box:checked').forEach(function(c){ 
+           var rawChild = c.value;
+           if(rawChild.startsWith('[')) {
+              var parts = rawChild.split('] ');
+              if(parts.length > 1) rawChild = parts.slice(1).join('] ');
+           }
+           detailsArr.push(rawChild.trim());
+        }); 
+
+        servicesMatrix.push({
+           name: serviceName,
+           type: type,
+           isSub: isSub,
+           basePrice: basePrice,
+           months: months,
+           totalPrice: basePrice * months,
+           details: detailsArr
+        });
+      });
+
+      var discountVal = document.getElementById('edit-custom-price').value;
+
+      var updateData = { 
+        company: newCompany, taxId: document.getElementById('edit-history-taxId').value,
+        rep: document.getElementById('edit-history-rep').value, contact: document.getElementById('edit-history-contact').value,
+        phone: document.getElementById('edit-history-phone').value, email: document.getElementById('edit-history-email').value,
+        address: document.getElementById('edit-history-address').value, subtotal: editCurrentSubtotal, 
+        tax: editCurrentTax, 
+        total: editCurrentOriginalTotal, 
+        customPrice: discountVal ? editCurrentTotal : "", 
+        selectedMainNames: selNames.join(', '),
+        selectedServices: JSON.stringify(servicesMatrix), 
+        terms: document.getElementById('edit-history-terms').value,
+        signature: editSignatureDataUrl || null
+      };
+
+      updateData.htmlTemplate = generateA4HTML(updateData, pid);
+
+      var record = globalHistoryData.find(function(r){ return r.projectId === pid; });
+      if (record) {
+         record.company = updateData.company; record.taxId = updateData.taxId;
+         record.mainServices = updateData.selectedMainNames; 
+         record.services = updateData.selectedServices; 
+         record.terms = updateData.terms; 
+         record.subtotal = updateData.subtotal;
+         record.tax = updateData.tax; record.total = updateData.total; record.customPrice = updateData.customPrice;
+      }
+      renderHistoryTable(globalHistoryData);
+      closeEditHistoryModal();
+      showToast("進度已於畫面更新，系統正默默產生新的 PDF 檔案...");
+      
+      apiCall('updateClientQuoteData', [rowId, pid, updateData], function(newPdfUrl){
+        if(record && newPdfUrl) record.pdfUrl = newPdfUrl;
+        renderHistoryTable(globalHistoryData);
+        localStorage.removeItem('ruby_edit_draft_' + pid); 
+        showToast("雲端 PDF 更新成功！");
+      }, function(err){
+        showToast("背景同步失敗：" + err);
+      });
+    }
+
+    function openPreviewModal() {
+      if(!document.getElementById('client-company').value) return showToast("請填寫公司名稱");
+      
+      var servicesMatrix = [];
+      var selNames = [];
+      
+      document.querySelectorAll('#service-list details.accordion-group .summary-left input:checked').forEach(function(box){ 
+        var group = box.closest('details.accordion-group');
+        var priceInput = group.querySelector('.service-price-input');
+        var monthsInput = group.querySelector('.service-months-input');
+        
+        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+        
+        var serviceName = box.value;
+        var type = box.getAttribute('data-type');
+        var isSub = (type === '訂閱服務');
+
+        selNames.push(serviceName);
+        
+        var detailsArr = [];
+        group.querySelectorAll('.child-box:checked').forEach(function(c){ 
+           var rawChild = c.value;
+           if(rawChild.startsWith('[')) {
+              var parts = rawChild.split('] ');
+              if(parts.length > 1) rawChild = parts.slice(1).join('] ');
+           }
+           detailsArr.push(rawChild.trim());
+        }); 
+
+        servicesMatrix.push({
+           name: serviceName,
+           type: type,
+           isSub: isSub,
+           basePrice: basePrice,
+           months: months,
+           totalPrice: basePrice * months,
+           details: detailsArr
+        });
+      });
+      
+      window.currentSelectedServiceNames = selNames; 
+      var discountVal = document.getElementById('client-custom-price').value;
+      
+      var data = { 
+        company: document.getElementById('client-company').value, taxId: document.getElementById('client-taxId').value, 
+        rep: document.getElementById('client-rep').value, contact: document.getElementById('client-contact').value, 
+        phone: document.getElementById('client-phone').value, address: document.getElementById('client-address').value, 
+        selectedServiceNames: selNames,
+        selectedServices: JSON.stringify(servicesMatrix),
+        subtotal: currentSubtotal, tax: currentTax, 
+        total: currentOriginalTotal, 
+        customPrice: discountVal ? currentTotal : "", 
+        terms: document.getElementById('client-terms').value, signature: newSignatureDataUrl
+      };
+
+      document.getElementById('preview-body').innerHTML = '<div style="text-align:center; padding: 40px; color: #86868b;">連線取得即時單號與排版中，請稍候...</div>';
+      document.getElementById('preview-modal').classList.add('show'); 
+      
+      apiCall('getNextIds', [], function(ids){
+        data.projectId = ids.projectId;
+        data.clientId = ids.clientId;
+        window.currentGeneratedData = data;
+        document.getElementById('preview-body').innerHTML = generateA4HTML(data, ids.projectId);
+      }, function(err){
+        document.getElementById('preview-body').innerHTML = generateA4HTML(data, '尚未產生單號');
+      });
+    }
+    
+    function closePreviewModal() { 
+      document.getElementById('preview-modal').classList.remove('show'); 
+      document.querySelector('#preview-modal .modal-footer').style.display = 'flex';
+    }
+    
+    function submitClient() {
+      var data = window.currentGeneratedData;
+      if (!data) return showToast("系統生成單號錯誤，請關閉後重新預覽提交");
+      
+      data.htmlTemplate = generateA4HTML(data, "{{PROJECT_ID}}");
+
+      document.getElementById('btn-confirm-submit').innerText = "歸檔與分發中..."; document.getElementById('btn-confirm-submit').disabled = true; showToast("系統產生 PDF 並自動分發至專案庫...");
+      
+      apiCall('submitClientQuote', [data], function(res){ 
+        showToast(res.message); 
+        document.getElementById('btn-confirm-submit').innerText = "確認簽約並建檔分發"; 
+        document.getElementById('btn-confirm-submit').disabled = false; 
+        
+        var successHtml = [];
+        successHtml.push('<div style="text-align:center; padding: 60px 20px;">');
+        successHtml.push('  <h3 style="color: #34c759; margin-bottom: 16px; font-size: 22px;">🎉 合約建檔與專案分發成功！</h3>');
+        successHtml.push('  <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 15px;">請複製以下專屬連結傳送給客戶（客戶點擊即可直接檢視 PDF）：</p>');
+        successHtml.push('  <div style="display:flex; gap:12px; justify-content:center; align-items:center; max-width: 500px; margin: 0 auto;">');
+        successHtml.push('    <input type="text" id="generated-pdf-link" value="' + res.pdfUrl + '" readonly style="flex: 1; background: #ffffff; color: #1d1d1f; border: 1px solid var(--text-main); font-size: 14px; padding: 12px 16px; border-radius: 8px;">');
+        successHtml.push('    <button class="primary" style="margin: 0; width: auto; padding: 12px 24px; border-radius: 8px;" onclick="copyPdfLink()">複製連結</button>');
+        successHtml.push('  </div></div>');
+        
+        document.getElementById('preview-body').innerHTML = successHtml.join('');
+        document.querySelector('#preview-modal .modal-footer').style.display = 'none';
+
+        newSignatureDataUrl = ''; 
+        document.getElementById('sig-preview-container').style.display='none'; 
+        localStorage.removeItem('ruby_client_autosave'); 
+      }, function(err){ 
+        showToast('同步失敗：' + err); 
+        document.getElementById('btn-confirm-submit').innerText = "確認簽約並建檔分發"; 
+        document.getElementById('btn-confirm-submit').disabled = false; 
+      });
+    }
+
+    function copyPdfLink() {
+      var linkInput = document.getElementById('generated-pdf-link');
+      linkInput.select();
+      linkInput.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      showToast('✅ 連結已成功複製，可直接貼給客戶！');
+    }
+
+    function triggerAutoSaveUI(statusId) { var statusEl = document.getElementById(statusId); statusEl.style.opacity = '1'; statusEl.innerText = '已自動儲存'; clearTimeout(autoSaveTimeout); autoSaveTimeout = setTimeout(function(){ statusEl.style.opacity = '0'; }, 2000); }
+    
+    function autoSaveSetup() { 
+      var data = { 
+        type: document.getElementById('setup-type').value, 
+        service: document.getElementById('setup-service').value, 
+        details: document.getElementById('setup-details').value, 
+        price: document.getElementById('setup-price').value, 
+        defaultMonths: document.getElementById('setup-months').value,
+        terms: document.getElementById('setup-terms').value 
+      }; 
+      try {
+        localStorage.setItem('ruby_setup_autosave', JSON.stringify(data)); 
+        triggerAutoSaveUI('setup-draft-status'); 
+      } catch(e) {}
+    }
+    
+    function autoSaveClient() { 
+      var checkedItems = []; 
+      var customItemPrices = {};
+
+      if (globalIsServiceLoaded) {
+          document.querySelectorAll('#service-list input[type="checkbox"]:checked').forEach(function(box){ checkedItems.push(box.value); }); 
+          document.querySelectorAll('#service-list .service-price-input').forEach(function(input){
+              customItemPrices[input.getAttribute('data-service')] = input.value;
+          });
+      } else {
+          try {
+              var existingSave = JSON.parse(localStorage.getItem('ruby_client_autosave'));
+              if (existingSave) {
+                  checkedItems = existingSave.checkedItems || [];
+                  customItemPrices = existingSave.customItemPrices || {};
+              }
+          } catch(e) {}
+      }
+
+      var data = { company: document.getElementById('client-company').value, taxId: document.getElementById('client-taxId').value, rep: document.getElementById('client-rep').value, contact: document.getElementById('client-contact').value, phone: document.getElementById('client-phone').value, email: document.getElementById('client-email').value, address: document.getElementById('client-address').value, terms: document.getElementById('client-terms').value, customPrice: document.getElementById('client-custom-price').value, customItemPrices: customItemPrices, checkedItems: checkedItems, signature: newSignatureDataUrl }; 
+      
+      try {
+        localStorage.setItem('ruby_client_autosave', JSON.stringify(data)); 
+        triggerAutoSaveUI('client-draft-status'); 
+      } catch (e) {
+        try {
+            var drafts = JSON.parse(localStorage.getItem('ruby_client_drafts') || '[]');
+            if (drafts.length > 0) {
+                drafts.shift(); 
+                localStorage.setItem('ruby_client_drafts', JSON.stringify(drafts));
+                localStorage.setItem('ruby_client_autosave', JSON.stringify(data)); 
+                triggerAutoSaveUI('client-draft-status');
+            }
+        } catch(err) {
+            console.warn("本機空間極度不足");
+        }
+      }
+    }
+    
+    function loadAutoSaveState() { 
+      try { 
+        var setupSave = JSON.parse(localStorage.getItem('ruby_setup_autosave')); 
+        if (setupSave) { document.getElementById('setup-type').value = setupSave.type || '單次服務'; document.getElementById('setup-service').value = setupSave.service || ''; document.getElementById('setup-details').value = setupSave.details || ''; document.getElementById('setup-price').value = setupSave.price || ''; document.getElementById('setup-months').value = setupSave.defaultMonths || '1'; document.getElementById('setup-terms').value = setupSave.terms || ''; } 
+        var clientSave = JSON.parse(localStorage.getItem('ruby_client_autosave')); 
+        if (clientSave) { document.getElementById('client-company').value = clientSave.company || ''; document.getElementById('client-taxId').value = clientSave.taxId || ''; document.getElementById('client-rep').value = clientSave.rep || ''; document.getElementById('client-contact').value = clientSave.contact || ''; document.getElementById('client-phone').value = clientSave.phone || ''; document.getElementById('client-email').value = clientSave.email || ''; document.getElementById('client-address').value = clientSave.address || ''; document.getElementById('client-terms').value = clientSave.terms || ''; 
+          if(clientSave.customPrice !== undefined) document.getElementById('client-custom-price').value = clientSave.customPrice;
+          if(clientSave.signature) {
+            newSignatureDataUrl = clientSave.signature;
+            document.getElementById('sig-preview-img').src = clientSave.signature;
+            document.getElementById('sig-preview-container').style.display = 'block';
+          }
+        } 
+      } catch (e) { } 
+    }
+    
+    function restoreClientCheckboxes() { 
+      try { 
+        var clientSave = JSON.parse(localStorage.getItem('ruby_client_autosave')); 
+        if (clientSave) { 
+          if (clientSave.customItemPrices) {
+            document.querySelectorAll('#service-list .service-price-input').forEach(function(input){
+              var sName = input.getAttribute('data-service');
+              if (clientSave.customItemPrices[sName] !== undefined) {
+                input.value = clientSave.customItemPrices[sName];
+              }
+            });
+          }
+          if (clientSave.checkedItems) {
+            document.querySelectorAll('#service-list input[type="checkbox"]').forEach(function(box){ if (clientSave.checkedItems.includes(box.value)) box.checked = true; }); 
+          }
+          calcTotal(); 
+        } 
+      } catch (e) {} 
+    }
+    
+    function saveSetupDraftToLib() { 
+      var name = document.getElementById('setup-service').value; 
+      if (!name) { showToast('請先輸入服務項目名稱作為草稿標題。'); return; } 
+      var data = JSON.parse(localStorage.getItem('ruby_setup_autosave') || '{}'); 
+      var drafts = JSON.parse(localStorage.getItem('ruby_setup_drafts') || '[]'); 
+      drafts.push({ id: Date.now(), title: name + ' (草稿)', data: data }); 
+      
+      try {
+        localStorage.setItem('ruby_setup_drafts', JSON.stringify(drafts)); 
+        showToast('草稿進度已儲存'); renderDraftDropdowns(); 
+      } catch(e) {
+        if(drafts.length > 1) {
+            drafts.shift(); 
+            drafts.shift(); 
+            localStorage.setItem('ruby_setup_drafts', JSON.stringify(drafts));
+            showToast('草稿進度已儲存 (系統已為您自動清理過舊的草稿騰出空間)'); renderDraftDropdowns();
+        }
+      }
+    }
+    
+    function saveClientDraftToLib() { 
+      var name = document.getElementById('client-company').value; 
+      if (!name) { showToast('請先輸入公司名稱作為草稿標題。'); return; } 
+      autoSaveClient(); 
+      var data = JSON.parse(localStorage.getItem('ruby_client_autosave') || '{}'); 
+      var drafts = JSON.parse(localStorage.getItem('ruby_client_drafts') || '[]'); 
+      drafts.push({ id: Date.now(), title: name + ' (報價草稿)', data: data }); 
+      
+      let saved = false;
+      while (!saved && drafts.length > 0) {
+          try {
+              localStorage.setItem('ruby_client_drafts', JSON.stringify(drafts)); 
+              saved = true;
+          } catch (e) {
+              if (drafts.length > 1) {
+                  drafts.shift(); 
+              } else {
+                  showToast('系統儲存空間嚴重不足，無法存入新草稿。');
+                  break;
+              }
+          }
       }
       
-      function toggleAddCustomNodeInline(prefilledNodeName = '') {
-          const el = document.getElementById('inline-add-node-form');
-          const nodeInput = document.getElementById('custom-node-name');
-          if (el.style.display === 'block') { el.style.display = 'none'; return; }
-          if (prefilledNodeName) {
-              nodeInput.value = prefilledNodeName;
-              nodeInput.readOnly = true;
-              nodeInput.style.background = '#f5f5f5';
-          } else {
-              nodeInput.value = ''; nodeInput.readOnly = false; nodeInput.style.background = '#fff';
-          }
-          document.getElementById("custom-node-date").value = new Date().toISOString().split('T')[0];
-          el.style.display = 'block';
-          window.scrollTo({ top: el.offsetTop - 80, behavior: 'smooth' });
+      if (saved) {
+          showToast('草稿進度已儲存'); 
+          renderDraftDropdowns(); 
+      }
+    }
+    
+    function renderDraftDropdowns() { 
+      var setupDrafts = JSON.parse(localStorage.getItem('ruby_setup_drafts') || '[]'); 
+      var setupSelect = document.getElementById('setup-draft-select'); 
+      if (setupSelect) {
+        setupSelect.innerHTML = '<option value="">載入草稿紀錄...</option>'; 
+        setupDrafts.forEach(function(d){ setupSelect.innerHTML += '<option value="' + d.id + '">' + d.title + '</option>'; }); 
       }
 
-      function handleDragStart(e) {
-          draggedTaskName = e.currentTarget.getAttribute('data-task-name');
-          draggedItemElement = e.currentTarget;
-          e.dataTransfer.effectAllowed = 'move';
-          setTimeout(() => e.currentTarget.classList.add('dragging'), 0);
+      var clientDrafts = JSON.parse(localStorage.getItem('ruby_client_drafts') || '[]'); 
+      var clientSelect = document.getElementById('client-draft-select'); 
+      if (clientSelect) {
+        clientSelect.innerHTML = '<option value="">載入草稿紀錄...</option>'; 
+        clientDrafts.forEach(function(d){ clientSelect.innerHTML += '<option value="' + d.id + '">' + d.title + '</option>'; }); 
       }
-      function handleDragEnter(e) {
-          e.preventDefault(); const targetCard = e.currentTarget;
-          if (targetCard !== draggedItemElement) targetCard.style.borderTop = '2px solid var(--text-main)';
-      }
-      function handleDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
-      function handleDragLeave(e) { e.currentTarget.style.borderTop = ''; }
-      function handleDrop(e, projectId, nodeName) {
-          e.stopPropagation(); const targetCard = e.currentTarget;
-          if (draggedItemElement) draggedItemElement.classList.remove('dragging');
-          document.querySelectorAll('.draggable-task').forEach(el => el.style.borderTop = '');
-          if (!targetCard || targetCard === draggedItemElement) return;
-
-          const container = document.getElementById('tasks-container');
-          const allCards = Array.from(container.querySelectorAll('.draggable-task'));
-          const draggedIdx = allCards.indexOf(draggedItemElement);
-          const targetIdx = allCards.indexOf(targetCard);
-          if (draggedIdx < targetIdx) container.insertBefore(draggedItemElement, targetCard.nextSibling);
-          else container.insertBefore(draggedItemElement, targetCard);
-
-          const newOrder = Array.from(container.querySelectorAll('.draggable-task')).map(el => el.getAttribute('data-task-name'));
-          updateTaskOrderAndPromptDates(projectId, nodeName, newOrder);
-      }
-      function handleDragEnd(e) {
-          if (draggedItemElement) draggedItemElement.classList.remove('dragging');
-          document.querySelectorAll('.draggable-task').forEach(el => el.style.borderTop = '');
-      }
-
-      async function updateTaskOrderAndPromptDates(projectId, nodeName, newOrder) {
-          const projList = StateStore.get('projectsList');
-          const targetProj = projList.find(p => p.projectId === projectId);
-          if (targetProj) {
-              if (!targetProj.taskOrder) targetProj.taskOrder = {};
-              targetProj.taskOrder[nodeName] = newOrder;
-              StateStore.set('projectsList', projList);
-          }
-          apiClient.call('updateTaskOrder', { projectId, nodeName, newOrder });
-          showToast("排序已儲存！請記得點擊時鐘按鈕修改排程日期。", "info");
-      }
-
-      async function submitEditLog(projectId, rowId, sheetType, timestamp, textInputId, durInputId) {
-          const newContent = document.getElementById(textInputId).value.trim();
-          const newDuration = parseFloat(document.getElementById(durInputId).value) || 0;
-          if (!newContent) return showToast("內容不能為空", "error");
-          showToast("正在更新日誌...", "info"); 
-          try { 
-              await apiClient.call('editLog', { projectId, rowId, sheetType, timestamp, newContent, newDuration });
-              showToast("日誌已更新！", "info"); const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderFishboneDiagram();
-          } catch(e) { showToast("更新失敗：" + e.toString(), "error"); }
-      }
-
-      function confirmDeleteLog(projectId, rowId, sheetType, timestamp) {
-          if(!confirm("確定要刪除這筆日誌嗎？此動作無法復原。")) return;
-          showToast("正在刪除...", "info");
-          apiClient.call('deleteLog', { projectId, rowId, sheetType, timestamp }).then(async () => {
-              showToast("日誌已刪除！", "info"); const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderFishboneDiagram();
-          }).catch(e => showToast("刪除失敗：" + e.toString(), "error"));
-      }
-
-      function confirmDeleteTask(projectId, rowId, sheetType, nodeName, taskName) {
-          if(!confirm(`確定要刪除任務「${taskName}」嗎？\n刪除後會從列表中消失，但歷史紀錄仍會保留。`)) return;
-          showToast("正在刪除任務...", "info");
-          apiClient.call('deleteTask', { projectId, rowId, sheetType, nodeName, taskName }).then(async () => {
-              showToast("任務已成功刪除！", "info"); const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderFishboneDiagram();
-          }).catch(e => showToast("刪除失敗：" + e.toString(), "error"));
-      }
-
-      function toggleTaskCompletion(projectId, rowId, sheetType, taskName, currentStatus) {
-          const newStatus = !currentStatus;
-          const oldState = JSON.parse(JSON.stringify(StateStore.get('projectsList')));
-          performOptimisticUpdate(
-            () => {
-                const projList = StateStore.get('projectsList');
-                const targetProj = projList.find(p => p.projectId === projectId);
-                if (targetProj) {
-                    if (!targetProj.taskStatus) targetProj.taskStatus = {};
-                    if (newStatus) targetProj.taskStatus[taskName] = true; else delete targetProj.taskStatus[taskName];
-                    StateStore.set('projectsList', projList); renderFishboneDiagram();
-                }
-            },
-            async () => { await apiClient.call('toggleTaskStatus', { projectId, rowId, sheetType, taskName, isCompleted: newStatus }); },
-            () => { StateStore.set('projectsList', oldState); renderFishboneDiagram(); }
-          );
-      }
-
-      async function submitEditTaskDate(projectId, nodeName, taskName, inputId) {
-          const newDate = document.getElementById(inputId).value;
-          if (!newDate) { showToast("請選擇一個日期", "error"); return; }
-          showToast("正在更新排程...", "info"); 
-          try {
-              await apiClient.call('updateTaskSchedule', { projectId, nodeName, taskName, newDate });
-              showToast("排程日期更新成功！", "info");
-              const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderFishboneDiagram();
-          } catch(e) { showToast("更新失敗：" + e.toString(), "error"); }
-      }
-
-      function submitTaskLog(projectId, rowId, sheetType, nodeName, taskName, textInputId, durInputId) {
-        const logContent = document.getElementById(textInputId).value.trim();
-        const duration = parseFloat(document.getElementById(durInputId).value);
-        if (!logContent || isNaN(duration)) return showToast("請填寫日誌並確保工時正確", "error");
-
-        const newLog = { taskName, logContent, duration, timestamp: new Date().toISOString() };
-        const oldState = JSON.parse(JSON.stringify(StateStore.get('projectsList')));
-        
-        performOptimisticUpdate(
-          () => { 
-            const projList = StateStore.get('projectsList');
-            const targetProj = projList.find(p => p.projectId === projectId);
-            if(targetProj) {
-                if(!targetProj.workLog) targetProj.workLog = [];
-                targetProj.workLog.push(newLog);
-                StateStore.set('projectsList', projList);
-                showToast("日誌已暫存，背景同步中...", "info"); renderFishboneDiagram(); 
-            }
-          },
-          async () => { 
-            await apiClient.call('updateSubTaskLog', { projectId, rowId, sheetType, nodeName, taskName, logContent, duration });
-            showToast("日誌成功寫入雲端資料庫", "info");
-          },
-          () => { StateStore.set('projectsList', oldState); renderFishboneDiagram(); }
-        );
-      }
-
-      function setupAutocomplete(inputId, dataList, parseOnSelect) {
-          const input = document.getElementById(inputId);
-          if(!input) return;
-          let wrapper = input.parentNode;
-          if(wrapper.className !== 'ac-wrapper') {
-              wrapper = document.createElement('div');
-              wrapper.className = 'ac-wrapper';
-              wrapper.style.position = 'relative';
-              input.parentNode.insertBefore(wrapper, input);
-              wrapper.appendChild(input);
-          }
-          
-          let list = wrapper.querySelector('.ac-list');
-          if(!list) {
-              list = document.createElement('div');
-              list.className = 'ac-list card-mono';
-              list.style.cssText = 'position:absolute; top:100%; left:0; right:0; max-height:200px; overflow-y:auto; background:#fff; z-index:1000; display:none; padding:0; margin-top:4px;';
-              wrapper.appendChild(list);
-          }
-
-          input.addEventListener('focus', () => renderList(dataList));
-          input.addEventListener('input', () => renderList(dataList));
-          document.addEventListener('click', (e) => { if(!wrapper.contains(e.target)) list.style.display='none'; });
-
-          function renderList(listData) {
-              const val = input.value.toLowerCase();
-              const filtered = listData.filter(item => item.toLowerCase().includes(val));
-              list.innerHTML = '';
-              if(filtered.length === 0) { list.style.display = 'none'; return; }
-              filtered.forEach(item => {
-                  const div = document.createElement('div');
-                  div.style.cssText = 'padding:8px 12px; cursor:pointer; border-bottom:1px solid var(--border-light); font-size:13px;';
-                  div.textContent = item;
-                  div.onmousedown = (e) => { 
-                      e.preventDefault(); 
-                      input.value = parseOnSelect ? parseOnSelect(item) : item; 
-                      list.style.display='none'; 
-                  };
-                  div.onmouseover = () => div.style.background = '#f5f5f5';
-                  div.onmouseout = () => div.style.background = '#fff';
-                  list.appendChild(div);
-              });
-              list.style.display = 'block';
-          }
-      }
-
-      function renderEmailView() {
-        const menu = StateStore.get('emailMenu');
-        if (menu) {
-            setupAutocomplete('email-to', menu.emails || [], (item) => {
-               const match = item.match(/(?:【.*?】\s*)?([^\s]+)\s*\(\d+\)/);
-               return match ? match[1] : item;
-            });
-            setupAutocomplete('email-subject', menu.subjects || [], (item) => item.replace(/\s*\(\d+\)$/, ''));
-            setupAutocomplete('email-body', menu.bodies || [], (item) => item.replace(/\s*\(\d+\)$/, ''));
-        }
-      }
-
-      async function handleEmailSubmit() {
-        const activeProjId = StateStore.get('activeProjectId');
-        if (!activeProjId) return showToast("請先從頂部選擇專案", "error");
-
-        const project = StateStore.get('projectsList').find(p => p.projectId === activeProjId);
-        const toEmail = document.getElementById('email-to').value.trim();
-        const subject = document.getElementById('email-subject').value.trim();
-        const body = document.getElementById('email-body').value.trim();
-        const fileInput = document.getElementById('email-files');
-        
-        if(!toEmail || !subject || !body) return showToast("請填寫收件人、主旨與內容", "error");
-        if(fileInput.files.length > 10) return showToast("最多只能上傳 10 個檔案", "error");
-
-        const btn = document.getElementById('btn-submit-email');
-        btn.disabled = true; btn.innerHTML = `<i data-lucide="loader" style="width:16px;height:16px; animation: spin 1s linear infinite;"></i> 處理中...`; lucide.createIcons();
-
+    }
+    
+    function loadSetupDraftFromLib() { 
+      var id = document.getElementById('setup-draft-select').value; if (!id) return; 
+      var drafts = JSON.parse(localStorage.getItem('ruby_setup_drafts') || '[]'); 
+      var draft = drafts.find(function(d){ return d.id == id; }); 
+      if (draft) { localStorage.setItem('ruby_setup_autosave', JSON.stringify(draft.data)); loadAutoSaveState(); showToast('草稿已載入'); } 
+      document.getElementById('setup-draft-select').value = ''; 
+    }
+    
+    function loadClientDraftFromLib() { 
+      var id = document.getElementById('client-draft-select').value; if (!id) return; 
+      var drafts = JSON.parse(localStorage.getItem('ruby_client_drafts') || '[]'); 
+      var draft = drafts.find(function(d){ return d.id == id; }); 
+      if (draft) { 
         try {
-           const attachmentsList = [];
-           for (let file of fileInput.files) {
-              const base64Str = await readFileAsBase64(file);
-              attachmentsList.push({ fileName: file.name, mimeType: file.type, base64Data: base64Str.split(',')[1] });
-           }
-           const payload = { projectId: activeProjId, clientName: project.clientName, subject, toEmail, body, attachmentsList };
-           
-           const histContainer = document.getElementById('email-history-container');
-           if (histContainer.innerHTML.includes("暫無新增紀錄")) histContainer.innerHTML = '';
-           const tempId = "temp-" + Date.now();
-           const optimisticCard = `<div id="${tempId}" class="card-mono" style="opacity:0.6; transition:opacity 0.3s;"><div style="font-weight:600;">[發送中] ${subject}</div><div class="caption">To: ${toEmail} | 附件: ${attachmentsList.length}</div></div>`;
-           histContainer.insertAdjacentHTML('afterbegin', optimisticCard);
-           
-           document.getElementById('email-to').value = ''; document.getElementById('email-subject').value = '';
-           document.getElementById('email-body').value = ''; fileInput.value = '';
-           
-           const result = await apiClient.call('sendEmailWithAttachments', payload);
-           
-           document.getElementById(tempId).style.opacity = '1';
-           document.getElementById(tempId).querySelector('div').innerText = `[已發送] ${subject}`;
-           showToast("Email 與附件已成功發送並歸檔雲端！", "info");
+            localStorage.setItem('ruby_client_autosave', JSON.stringify(draft.data)); 
+            loadAutoSaveState(); 
+            restoreClientCheckboxes(); 
+            showToast('草稿已載入'); 
+        } catch(e) {}
+      } 
+      document.getElementById('client-draft-select').value = ''; 
+    }
 
-           const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderEmailView();
-        } catch (e) { showToast("寄送失敗: " + e.toString(), "error");
-        } finally { btn.disabled = false; btn.innerHTML = `<i data-lucide="send" style="width:16px;height:16px;"></i> 發送並歸檔`; lucide.createIcons(); }
-      }
+    function fetchClientInfo() { 
+        var taxId = document.getElementById('client-taxId').value.trim(); 
+        if(!taxId) return; 
+        showToast("搜尋客戶中..."); 
+        apiCall('getClientByTaxId', [taxId], function(c){ 
+            if(c) { 
+                document.getElementById('client-company').value=c.company; 
+                document.getElementById('client-rep').value=c.rep; 
+                document.getElementById('client-contact').value=c.contact; 
+                document.getElementById('client-phone').value=c.phone; 
+                document.getElementById('client-email').value=c.email; 
+                document.getElementById('client-address').value=c.address; 
+                showToast("已載入舊客戶資料"); 
+                autoSaveClient(); 
+            } else { 
+                showToast("無相符紀錄"); 
+            } 
+        }); 
+    }
 
-      function readFileAsBase64(file) {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = (e) => resolve(e.target.result);
-            reader.onerror = (e) => reject(e);
-            reader.readAsDataURL(file);
-        });
-      }
-
-      async function submitCustomNode() {
-        const activeProjId = StateStore.get('activeProjectId');
-        const nodeName = document.getElementById('custom-node-name').value.trim();
-        const taskName = document.getElementById('custom-task-name').value.trim();
-        const date = document.getElementById('custom-node-date').value;
-        const duration = parseFloat(document.getElementById('custom-node-duration').value) || 0.5;
-
-        if (!nodeName || !taskName || !date) { showToast("請填寫所有必填欄位！", "error"); return; }
-        const btn = document.getElementById('btn-submit-custom-node');
-        btn.disabled = true; btn.innerHTML = `<i data-lucide="loader" style="width:16px;height:16px; animation: spin 1s linear infinite;"></i> 寫入中...`; lucide.createIcons();
-
-        try {
-          const payload = { projectId: activeProjId, nodeName, taskName, date, duration };
-          const result = await apiClient.call('addCustomNode', payload);
-          showToast(result.message || "任務已新增成功！", "info");
-          document.getElementById('inline-add-node-form').style.display = 'none';
-          const freshData = await apiClient.call('getInitialData'); StateStore.setInitialData(freshData); renderFishboneDiagram();
-        } catch (err) {
-          showToast("新增失敗：" + err.toString(), "error");
-        } finally {
-          btn.disabled = false; btn.innerHTML = `<i data-lucide="save" style="width:16px;height:16px;"></i> 儲存並排入日曆`; lucide.createIcons();
-        }
-      }
-
-      // ==========================================
-      // 全域初始化
-      // ==========================================
-      window.onload = async () => {
-        lucide.createIcons(); 
-        initHeaderUI();
-
-        EventHub.on("stateLoadedFromCache", () => { filterAndRenderProjects(); renderFishboneDiagram(); renderEmailView(); });
-        EventHub.on("initialDataLoaded", () => { filterAndRenderProjects(); renderFishboneDiagram(); renderEmailView(); });
-        EventHub.on("stateUpdated:activeProjectId", () => { renderFishboneDiagram(); });
-
-        StateStore.loadFromLocalStorage();
-
-        try {
-          renderSkeletonLoader('accordion-container', 'accordion');
-          renderSkeletonLoader('fishbone-svg-container', 'fishbone');
-
-          const data = await apiClient.call('getInitialData');
-          StateStore.setInitialData(data);
-          
-          showToast("成功連線，已讀取雲端最新資料！", "info");
-
-        } catch(e) {
-          const errorMsg = typeof e === 'string' ? e : (e.message || JSON.stringify(e));
-          showToast("讀取失敗：" + errorMsg, "error");
-        }
-      };
-    </script>
-  </body>
+  </script>
+</body>
 </html>
