@@ -1131,11 +1131,11 @@
       htmlDoc.push('  <table style="width: 100%; border: none; margin-bottom: 24px; table-layout: fixed; border-spacing: 0;"><tr>');
       htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
       htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">甲方 (委託方)</b><br>');
-      htmlDoc.push('      <b>公司名：</b>' + (data.company || '(未提供)') + '<br><b>統編：</b>' + (data.taxId || '(未提供)') + '<br><b>地址：</b>' + (data.address||'(未提供)').replace(/\n/g, '<br>') + '<br><b>聯繫人：</b>' + (data.contact || ''));
+      htmlDoc.push('      <b>公司名稱：</b>' + (data.company || '(未提供)') + '<br><b>統一編號：</b>' + (data.taxId || '(未提供)') + '<br><b>代表人：</b>' + (data.rep || '(未提供)') + '<br><b>聯絡電話：</b>' + (data.phone || '(未提供)') + '<br><b>地址：</b>' + (data.address||'(未提供)').replace(/\n/g, '<br>') + '<br><b>Email：</b>' + (data.email || '(未提供)'));
       htmlDoc.push('    </td><td style="border: none; width: 4%;"></td>');
       htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
       htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">乙方 (執行方)</b><br>');
-      htmlDoc.push('      <b>公司名稱：</b>露比設計有限公司<br><b>統編：</b>89190593<br><b>代表人：</b>廖怡甄<br><b>聯絡電話：</b>0909-824-134<br><b>地址：</b>臺中市西區民龍里臺灣大道二段375號12樓之1<br><b>Email：</b>ruby.brand.design@gmail.com');
+      htmlDoc.push('      <b>公司名稱：</b>露比設計有限公司<br><b>統一編號：</b>89190593<br><b>代表人：</b>廖怡甄<br><b>聯絡電話：</b>0909-824-134<br><b>地址：</b>臺中市西區民龍里臺灣大道二段375號12樓之1<br><b>Email：</b>ruby.brand.design@gmail.com');
       htmlDoc.push('    </td></tr></table>');
       htmlDoc.push('  <h3>一、 服務項目與規格大綱</h3>');
       htmlDoc.push('  <table><tr><th width="35%">項目名稱</th><th>細項說明</th></tr>' + modulesHtml + '</table>');
@@ -1158,14 +1158,14 @@
       htmlDoc.push('  <div class="party-block"><div class="party-title">甲方 (委託方) 簽署區</div>');
       htmlDoc.push('    <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;"><tr>');
       htmlDoc.push('      <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 45%; font-size: 14px;">');
-      htmlDoc.push('        <b>公司名：</b>' + (data.company || '') + '<br><b>統編：</b>' + (data.taxId || '') + '<br><b>代表人：</b>' + (data.rep || '') + '<br><b>聯繫人：</b>' + (data.contact || '') + '<br><b>電話：</b>' + (data.phone || '') + '<br><b>地址：</b>' + (data.address||'').replace(/\n/g, '<br>'));
+      htmlDoc.push('        <b>公司名稱：</b>' + (data.company || '') + '<br><b>統一編號：</b>' + (data.taxId || '') + '<br><b>代表人：</b>' + (data.rep || ''));
       htmlDoc.push('      </td><td style="border: none; padding: 0; text-align: right; vertical-align: bottom; width: 55%;">' + sigImg + '</td>');
       htmlDoc.push('    </tr></table></div>');
 
       htmlDoc.push('  <div class="party-block"><div class="party-title">乙方 (執行方) 簽署區</div>');
       htmlDoc.push('    <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;"><tr>');
       htmlDoc.push('      <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 45%; font-size: 14px;">');
-      htmlDoc.push('        <b>公司名稱：</b>露比設計有限公司<br><b>統編：</b>89190593<br><b>代表人：</b>廖怡甄');
+      htmlDoc.push('        <b>公司名稱：</b>露比設計有限公司<br><b>統一編號：</b>89190593<br><b>代表人：</b>廖怡甄');
       htmlDoc.push('      </td><td style="border: none; padding: 0; text-align: right; vertical-align: bottom; width: 55%;">');
       htmlDoc.push('        <img src="' + sealUrl + '" style="width: 100%; max-width: 300px; height: auto; object-fit: contain; margin-right: 5px; margin-bottom: -10px;">');
       htmlDoc.push('      </td></tr></table></div>');
@@ -1404,7 +1404,7 @@
       var data = { 
         company: document.getElementById('client-company').value, taxId: document.getElementById('client-taxId').value, 
         rep: document.getElementById('client-rep').value, contact: document.getElementById('client-contact').value, 
-        phone: document.getElementById('client-phone').value, address: document.getElementById('client-address').value, 
+        phone: document.getElementById('client-phone').value, email: document.getElementById('client-email').value, address: document.getElementById('client-address').value, 
         selectedServiceNames: selNames,
         selectedServices: JSON.stringify(servicesMatrix),
         subtotal: currentSubtotal, tax: currentTax, 
