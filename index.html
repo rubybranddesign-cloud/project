@@ -247,7 +247,16 @@
           </div>
           <button class="secondary" onclick="openSignatureModal('new')" style="width: auto; padding: 12px 24px; margin-top: 16px;">點我簽名 / 重簽</button>
         </div>
-        <button class="primary" onclick="openPreviewModal()" style="margin-bottom: 60px;">預覽 A4 報價合約</button>
+        
+        <!-- 新版：新建合約的行內預覽按鈕與區塊 -->
+        <button class="primary" onclick="generateInlinePreview('new')" style="margin-bottom: 20px;">預覽 A4 報價合約</button>
+        <div id="inline-preview-area-new" style="display:none; border: 1px solid var(--border-color); border-radius: 12px; padding: 20px; background: #e5e5ea; margin-bottom: 60px;">
+          <div id="inline-preview-body-new"></div>
+          <div id="inline-preview-actions-new" style="display:flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+            <button class="secondary" onclick="closeInlinePreview('new')" style="width:auto; margin:0;">收起預覽，返回修改</button>
+            <button class="primary" id="btn-confirm-submit-new" onclick="submitClient()" style="width:auto; margin:0;">確認簽約並建檔分發</button>
+          </div>
+        </div>
       </div>
 
       <div id="client-tab-history" style="display: none;">
@@ -282,17 +291,6 @@
       </div>
     </div>
 
-  </div>
-
-  <div class="modal-overlay" id="preview-modal">
-    <div class="modal-content" style="max-width: 900px; background: #e5e5ea;">
-      <div class="modal-header" style="background: var(--bg-color);"><h2>A4 報價合約預覽</h2><button class="close-btn" onclick="closePreviewModal()">&times;</button></div>
-      <div class="modal-body" id="preview-body" style="padding: 40px 20px;"></div>
-      <div class="modal-footer" style="justify-content: flex-end; background: var(--bg-color);">
-        <button class="secondary" onclick="closePreviewModal()" style="margin: 0; width: auto;">返回修改</button>
-        <button class="primary" id="btn-confirm-submit" onclick="submitClient()" style="margin: 0; width: auto;">確認簽約並建檔分發</button>
-      </div>
-    </div>
   </div>
 
   <div class="modal-overlay" id="edit-history-modal">
@@ -358,12 +356,26 @@
             <button class="secondary" onclick="cancelEditCanvas()" style="width: auto; padding: 10px 20px; margin: 0; flex:1;">取消重簽 (沿用舊版)</button>
           </div>
         </div>
+        
+        <!-- 🌟 已經將預覽區塊安全地搬進 modal-body 裡面了 🌟 -->
+        <div id="inline-preview-area-edit" style="display:none; width: 100%; border-top: 1px dashed var(--border-color); margin-top: 30px; padding-top: 30px; box-sizing: border-box;">
+          <h3 style="font-size: 16px; margin-top: 0; margin-bottom: 20px; color: var(--text-main);">預覽與確認送出</h3>
+          <div id="inline-preview-body-edit" style="background: #e5e5ea; padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);"></div>
+          
+          <div style="display:flex; justify-content: flex-end; gap: 12px; margin-top: 20px;">
+            <button class="secondary" onclick="closeInlinePreview('edit')" style="width:auto; margin:0;">收起預覽</button>
+            <button class="primary" id="btn-confirm-submit-edit" onclick="submitEditHistory()" style="width:auto; margin:0;">確認儲存並產生 PDF</button>
+          </div>
+        </div>
 
       </div>
-      <div class="modal-footer" style="justify-content: flex-end;">
-        <button class="secondary" onclick="closeEditHistoryModal()" style="margin: 0; width: auto;">取消</button>
-        <button class="primary" id="btn-submit-edit" onclick="submitEditHistory()" style="margin: 0; width: auto;">儲存變更並重新產生 PDF</button>
+      
+      <!-- 🌟 原本的 footer 恢復乾淨狀態，只保留常駐的取消與預覽按鈕 🌟 -->
+      <div class="modal-footer" style="justify-content: flex-end; flex-wrap: wrap;">
+        <button class="secondary" onclick="closeEditHistoryModal()" style="margin: 0; width: auto; margin-right: 12px;">取消</button>
+        <button class="primary" id="btn-submit-edit" onclick="generateInlinePreview('edit')" style="margin: 0; width: auto;">向下展開 A4 報價預覽</button>
       </div>
+
     </div>
   </div>
 
@@ -422,6 +434,7 @@
     var editCurrentSubtotal = 0; var editCurrentTax = 0; var editCurrentOriginalTotal = 0; var editCurrentTotal = 0;
     var globalHistoryData = []; 
     var typeOrder = ["單次服務", "訂閱服務", "顧問服務"];
+    var currentPreviewMode = 'new'; // 用來控制 inline preview 的模式
 
     var globalTodayStr = "";
     var globalTomorrowStr = "";
@@ -788,7 +801,10 @@
       autoLoadEditDraftIfExist(record.projectId);
     }
 
-    function closeEditHistoryModal() { document.getElementById('edit-history-modal').classList.remove('show'); }
+    function closeEditHistoryModal() { 
+      document.getElementById('edit-history-modal').classList.remove('show'); 
+      closeInlinePreview('edit'); // 關閉編輯視窗時，連同展開的預覽一起收起
+    }
 
     function renderEditQuoteList(items, selectedServicesStr) { 
       var listDiv = document.getElementById('edit-service-list'); 
@@ -1062,7 +1078,7 @@
     }
 
     // =====================================
-    // A4 排版引擎
+    // A4 排版引擎 (已統一名稱且擴充聯絡人)
     // =====================================
     function generateA4HTML(data, quoteId) {
       var now = new Date();
@@ -1080,7 +1096,7 @@
               var priceStr = item.totalPrice > 0 ? '<br><span style="color:#86868b; font-size:13px; font-weight:normal;">本項小計：$' + Number(item.totalPrice).toLocaleString() + '</span>' : '';
               var detailsHtml = item.details.map(function(d){ return "• " + d; }).join('<br>');
               
-              var displayName = item.name;
+              var displayName = item.item_name || item.name;
               if (item.months > 1 || item.isSub) displayName += ' (x' + item.months + '個月)';
 
               modulesHtmlParts.push('<tr><td><b>' + displayName + '</b>' + priceStr + '</td><td>' + detailsHtml + '</td></tr>');
@@ -1131,11 +1147,11 @@
       htmlDoc.push('  <table style="width: 100%; border: none; margin-bottom: 24px; table-layout: fixed; border-spacing: 0;"><tr>');
       htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
       htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">甲方 (委託方)</b><br>');
-      htmlDoc.push('      <b>公司名稱：</b>' + (data.company || '(未提供)') + '<br><b>統一編號：</b>' + (data.taxId || '(未提供)') + '<br><b>代表人：</b>' + (data.rep || '(未提供)') + '<br><b>聯絡電話：</b>' + (data.phone || '(未提供)') + '<br><b>地址：</b>' + (data.address||'(未提供)').replace(/\n/g, '<br>') + '<br><b>Email：</b>' + (data.email || '(未提供)'));
+      htmlDoc.push('      <b>公司名稱：</b>' + (data.company || '(未提供)') + '<br><b>統一編號：</b>' + (data.taxId || '(未提供)') + '<br><b>代表人：</b>' + (data.rep || '(未提供)') + '<br><b>聯絡人：</b>' + (data.contact || '(未提供)') + '<br><b>聯絡電話：</b>' + (data.phone || '(未提供)') + '<br><b>地址：</b>' + (data.address||'(未提供)').replace(/\n/g, '<br>') + '<br><b>Email：</b>' + (data.email || '(未提供)'));
       htmlDoc.push('    </td><td style="border: none; width: 4%;"></td>');
       htmlDoc.push('    <td style="border: none; width: 48%; padding: 20px; background-color: #f8f9fa; border-radius: 8px; vertical-align: top; font-size: 13px; line-height: 1.8;">');
       htmlDoc.push('      <b style="font-size: 15px; border-bottom: 2px solid #1D1D1F; padding-bottom: 4px; display: inline-block; margin-bottom: 12px; color: #1d1d1f;">乙方 (執行方)</b><br>');
-      htmlDoc.push('      <b>公司名稱：</b>露比設計有限公司<br><b>統一編號：</b>89190593<br><b>代表人：</b>廖怡甄<br><b>聯絡電話：</b>0909-824-134<br><b>地址：</b>臺中市西區民龍里臺灣大道二段375號12樓之1<br><b>Email：</b>ruby.brand.design@gmail.com');
+      htmlDoc.push('      <b>公司名稱：</b>露比設計有限公司<br><b>統一編號：</b>89190593<br><b>代表人：</b>廖怡甄<br><b>聯絡人：</b>廖怡甄<br><b>聯絡電話：</b>0909-824-134<br><b>地址：</b>臺中市西區民龍里臺灣大道二段375號12樓之1<br><b>Email：</b>ruby.brand.design@gmail.com');
       htmlDoc.push('    </td></tr></table>');
       htmlDoc.push('  <h3>一、 服務項目與規格大綱</h3>');
       htmlDoc.push('  <table><tr><th width="35%">項目名稱</th><th>細項說明</th></tr>' + modulesHtml + '</table>');
@@ -1182,287 +1198,211 @@
     }
 
     // =====================================
-    // 儲存進度模組
+    // 預覽與提交路由器 (新版：行內展開預覽)
     // =====================================
-    function autoSaveEdit() { triggerAutoSaveUI('edit-draft-status'); }
-
-    function saveEditDraft() {
-      var pid = document.getElementById('edit-history-pid').value;
-      if (!pid) return;
-      var checkedItems = []; 
-      document.querySelectorAll('#edit-service-list input[type="checkbox"]:checked').forEach(function(box) { checkedItems.push(box.value); }); 
-      
-      var customItemPrices = {};
-      document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input) {
-          customItemPrices[input.getAttribute('data-service')] = input.value;
-      });
-
-      var data = { 
-        company: document.getElementById('edit-history-company').value, taxId: document.getElementById('edit-history-taxId').value, 
-        rep: document.getElementById('edit-history-rep').value, contact: document.getElementById('edit-history-contact').value, 
-        phone: document.getElementById('edit-history-phone').value, email: document.getElementById('edit-history-email').value, 
-        address: document.getElementById('edit-history-address').value, terms: document.getElementById('edit-history-terms').value, 
-        customPrice: document.getElementById('edit-custom-price').value,
-        customItemPrices: customItemPrices,
-        checkedItems: checkedItems, signature: editSignatureDataUrl
-      }; 
-      
-      try {
-        localStorage.setItem('ruby_edit_draft_' + pid, JSON.stringify(data)); 
-        showToast('此專案的編輯進度已儲存'); 
-        document.getElementById('edit-draft-status').innerText = '已手動儲存';
-        triggerAutoSaveUI('edit-draft-status');
-      } catch (e) {
-        showToast('本機儲存空間已滿，請清除部分草稿再試！');
-      }
-    }
-
-    function loadEditDraft() {
-      var pid = document.getElementById('edit-history-pid').value;
-      if (!pid) return;
-      var draftJson = localStorage.getItem('ruby_edit_draft_' + pid);
-      if (!draftJson) return showToast('無此專案的草稿');
-      try {
-        var draft = JSON.parse(draftJson);
-        document.getElementById('edit-history-company').value = draft.company || '';
-        document.getElementById('edit-history-taxId').value = draft.taxId || '';
-        document.getElementById('edit-history-rep').value = draft.rep || '';
-        document.getElementById('edit-history-contact').value = draft.contact || '';
-        document.getElementById('edit-history-phone').value = draft.phone || '';
-        document.getElementById('edit-history-email').value = draft.email || '';
-        document.getElementById('edit-history-address').value = draft.address || '';
-        document.getElementById('edit-history-terms').value = draft.terms || '';
-        if (draft.customPrice !== undefined) document.getElementById('edit-custom-price').value = draft.customPrice;
-
-        if (draft.customItemPrices) {
-          document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input) {
-            var sName = input.getAttribute('data-service');
-            if (draft.customItemPrices[sName] !== undefined) {
-              input.value = draft.customItemPrices[sName];
-            }
-          });
-        }
-
-        if (draft.checkedItems) { 
-          document.querySelectorAll('#edit-service-list input[type="checkbox"]').forEach(function(box) { 
-            box.checked = draft.checkedItems.includes(box.value);
-          }); 
-        } 
-        
-        calcEditTotal(); 
-
-        if (draft.signature) {
-          editSignatureDataUrl = draft.signature;
-          document.getElementById('edit-sig-preview-img').src = draft.signature;
-          document.getElementById('edit-sig-preview-container').style.display = 'block';
-          document.getElementById('edit-sig-placeholder').style.display = 'none';
-        }
-
-        showToast('已載入編輯草稿');
-      } catch (e) {}
-    }
-
-    function autoLoadEditDraftIfExist(pid) {
-      var draftJson = localStorage.getItem('ruby_edit_draft_' + pid);
-      if (draftJson) {
-        showToast('偵測到此專案的未完成草稿，點擊上方【載入草稿】即可還原');
-      }
-    }
-
-    // =====================================
-    // 提交與排版預覽
-    // =====================================
-    function submitEditHistory() {
-      var pid = document.getElementById('edit-history-pid').value;
-      var rowId = document.getElementById('edit-history-rowId').value;
-      var newCompany = document.getElementById('edit-history-company').value;
-      if (!newCompany) return showToast("請確認公司名稱。");
-      
-      var servicesMatrix = [];
-      var selNames = []; 
-      
-      document.querySelectorAll('#edit-service-list details.accordion-group .summary-left input:checked').forEach(function(box) { 
-        var group = box.closest('details.accordion-group');
-        var priceInput = group.querySelector('.edit-service-price-input');
-        var monthsInput = group.querySelector('.edit-service-months-input');
-        
-        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
-        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
-        
-        var serviceName = box.value;
-        var type = box.getAttribute('data-type');
-        var isSub = (type === '訂閱服務') || box.getAttribute('data-issub') === 'true';
-
-        selNames.push(serviceName); 
-
-        var detailsArr = [];
-        group.querySelectorAll('.edit-child-box:checked').forEach(function(c){ 
-           var rawChild = c.value;
-           if(rawChild.startsWith('[')) {
-              var parts = rawChild.split('] ');
-              if(parts.length > 1) rawChild = parts.slice(1).join('] ');
-           }
-           detailsArr.push(rawChild.trim());
-        }); 
-
-        servicesMatrix.push({
-           name: serviceName,
-           type: type,
-           isSub: isSub,
-           basePrice: basePrice,
-           months: months,
-           totalPrice: basePrice * months,
-           details: detailsArr
-        });
-      });
-
-      var discountVal = document.getElementById('edit-custom-price').value;
-
-      var updateData = { 
-        company: newCompany, taxId: document.getElementById('edit-history-taxId').value,
-        rep: document.getElementById('edit-history-rep').value, contact: document.getElementById('edit-history-contact').value,
-        phone: document.getElementById('edit-history-phone').value, email: document.getElementById('edit-history-email').value,
-        address: document.getElementById('edit-history-address').value, subtotal: editCurrentSubtotal, 
-        tax: editCurrentTax, 
-        total: editCurrentOriginalTotal, 
-        customPrice: discountVal ? editCurrentTotal : "", 
-        selectedMainNames: selNames.join(', '),
-        selectedServices: JSON.stringify(servicesMatrix), 
-        terms: document.getElementById('edit-history-terms').value,
-        signature: editSignatureDataUrl || null
-      };
-
-      updateData.htmlTemplate = generateA4HTML(updateData, pid);
-
-      var record = globalHistoryData.find(function(r){ return r.projectId === pid; });
-      if (record) {
-         record.company = updateData.company; record.taxId = updateData.taxId;
-         record.mainServices = updateData.selectedMainNames; 
-         record.services = updateData.selectedServices; 
-         record.terms = updateData.terms; 
-         record.subtotal = updateData.subtotal;
-         record.tax = updateData.tax; record.total = updateData.total; record.customPrice = updateData.customPrice;
-      }
-      renderHistoryTable(globalHistoryData);
-      closeEditHistoryModal();
-      showToast("進度已於畫面更新，系統正默默產生新的 PDF 檔案...");
-      
-      apiCall('updateClientQuoteData', [rowId, pid, updateData], function(newPdfUrl){
-        if(record && newPdfUrl) record.pdfUrl = newPdfUrl;
-        renderHistoryTable(globalHistoryData);
-        localStorage.removeItem('ruby_edit_draft_' + pid); 
-        showToast("雲端 PDF 更新成功！");
-      }, function(err){
-        showToast("背景同步失敗：" + err);
-      });
-    }
-
-    function openPreviewModal() {
-      if(!document.getElementById('client-company').value) return showToast("請填寫公司名稱");
-      
+    function generateInlinePreview(mode) {
+      currentPreviewMode = mode || 'new';
+      var data = {};
       var servicesMatrix = [];
       var selNames = [];
-      
-      document.querySelectorAll('#service-list details.accordion-group .summary-left input:checked').forEach(function(box){ 
-        var group = box.closest('details.accordion-group');
-        var priceInput = group.querySelector('.service-price-input');
-        var monthsInput = group.querySelector('.service-months-input');
-        
-        var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
-        var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
-        
-        var serviceName = box.value;
-        var type = box.getAttribute('data-type');
-        var isSub = (type === '訂閱服務');
 
-        selNames.push(serviceName);
-        
-        var detailsArr = [];
-        group.querySelectorAll('.child-box:checked').forEach(function(c){ 
-           var rawChild = c.value;
-           if(rawChild.startsWith('[')) {
-              var parts = rawChild.split('] ');
-              if(parts.length > 1) rawChild = parts.slice(1).join('] ');
-           }
-           detailsArr.push(rawChild.trim());
-        }); 
+      var previewArea = document.getElementById('inline-preview-area-' + mode);
+      var previewBody = document.getElementById('inline-preview-body-' + mode);
 
-        servicesMatrix.push({
-           name: serviceName,
-           type: type,
-           isSub: isSub,
-           basePrice: basePrice,
-           months: months,
-           totalPrice: basePrice * months,
-           details: detailsArr
+      if (currentPreviewMode === 'new') {
+        if(!document.getElementById('client-company').value) return showToast("請填寫公司名稱");
+        
+        data.company = document.getElementById('client-company').value;
+        data.taxId = document.getElementById('client-taxId').value;
+        data.rep = document.getElementById('client-rep').value;
+        data.contact = document.getElementById('client-contact').value;
+        data.phone = document.getElementById('client-phone').value;
+        data.email = document.getElementById('client-email').value;
+        data.address = document.getElementById('client-address').value;
+        data.terms = document.getElementById('client-terms').value;
+        data.customPrice = document.getElementById('client-custom-price').value ? currentTotal : "";
+        data.subtotal = currentSubtotal;
+        data.tax = currentTax;
+        data.total = currentOriginalTotal;
+        data.signature = newSignatureDataUrl;
+
+        document.querySelectorAll('#service-list details.accordion-group .summary-left input:checked').forEach(function(box){ 
+          var group = box.closest('details.accordion-group');
+          var priceInput = group.querySelector('.service-price-input');
+          var monthsInput = group.querySelector('.service-months-input');
+          var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+          var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+          var serviceName = box.value;
+          var type = box.getAttribute('data-type');
+          var isSub = (type === '訂閱服務');
+
+          selNames.push(serviceName);
+          
+          var detailsArr = [];
+          group.querySelectorAll('.child-box:checked').forEach(function(c){ 
+             var rawChild = c.value;
+             if(rawChild.startsWith('[')) {
+                var parts = rawChild.split('] ');
+                if(parts.length > 1) rawChild = parts.slice(1).join('] ');
+             }
+             detailsArr.push(rawChild.trim());
+          }); 
+
+          servicesMatrix.push({ name: serviceName, type: type, isSub: isSub, basePrice: basePrice, months: months, totalPrice: basePrice * months, details: detailsArr });
         });
-      });
-      
-      window.currentSelectedServiceNames = selNames; 
-      var discountVal = document.getElementById('client-custom-price').value;
-      
-      var data = { 
-        company: document.getElementById('client-company').value, taxId: document.getElementById('client-taxId').value, 
-        rep: document.getElementById('client-rep').value, contact: document.getElementById('client-contact').value, 
-        phone: document.getElementById('client-phone').value, email: document.getElementById('client-email').value, address: document.getElementById('client-address').value, 
-        selectedServiceNames: selNames,
-        selectedServices: JSON.stringify(servicesMatrix),
-        subtotal: currentSubtotal, tax: currentTax, 
-        total: currentOriginalTotal, 
-        customPrice: discountVal ? currentTotal : "", 
-        terms: document.getElementById('client-terms').value, signature: newSignatureDataUrl
-      };
-
-      document.getElementById('preview-body').innerHTML = '<div style="text-align:center; padding: 40px; color: #86868b;">連線取得即時單號與排版中，請稍候...</div>';
-      document.getElementById('preview-modal').classList.add('show'); 
-      
-      apiCall('getNextIds', [], function(ids){
-        data.projectId = ids.projectId;
-        data.clientId = ids.clientId;
+        
+        data.selectedServiceNames = selNames; 
+        data.selectedServices = JSON.stringify(servicesMatrix);
         window.currentGeneratedData = data;
-        document.getElementById('preview-body').innerHTML = generateA4HTML(data, ids.projectId);
-      }, function(err){
-        document.getElementById('preview-body').innerHTML = generateA4HTML(data, '尚未產生單號');
-      });
+        
+        document.getElementById('inline-preview-actions-new').style.display = 'flex'; // 確保按鈕有顯示
+        previewBody.innerHTML = '<div style="text-align:center; padding: 40px; color: #86868b;">連線取得即時單號與排版中，請稍候...</div>';
+        previewArea.style.display = 'block'; 
+        
+        apiCall('getNextIds', [], function(ids){
+          data.projectId = ids.projectId;
+          data.clientId = ids.clientId;
+          previewBody.innerHTML = generateA4HTML(data, ids.projectId);
+          previewArea.scrollIntoView({ behavior: 'smooth', block: 'start' }); // 平滑滾動到預覽區
+        }, function(err){
+          previewBody.innerHTML = generateA4HTML(data, '尚未產生單號');
+          previewArea.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        
+      } else if (currentPreviewMode === 'edit') {
+        if(!document.getElementById('edit-history-company').value) return showToast("請確認公司名稱");
+        
+        data.projectId = document.getElementById('edit-history-pid').value;
+        data.rowId = document.getElementById('edit-history-rowId').value;
+        data.company = document.getElementById('edit-history-company').value;
+        data.taxId = document.getElementById('edit-history-taxId').value;
+        data.rep = document.getElementById('edit-history-rep').value;
+        data.contact = document.getElementById('edit-history-contact').value;
+        data.phone = document.getElementById('edit-history-phone').value;
+        data.email = document.getElementById('edit-history-email').value;
+        data.address = document.getElementById('edit-history-address').value;
+        data.terms = document.getElementById('edit-history-terms').value;
+        data.customPrice = document.getElementById('edit-custom-price').value ? editCurrentTotal : "";
+        data.subtotal = editCurrentSubtotal;
+        data.tax = editCurrentTax;
+        data.total = editCurrentOriginalTotal;
+        data.signature = editSignatureDataUrl;
+
+        document.querySelectorAll('#edit-service-list details.accordion-group .summary-left input:checked').forEach(function(box){ 
+          var group = box.closest('details.accordion-group');
+          var priceInput = group.querySelector('.edit-service-price-input');
+          var monthsInput = group.querySelector('.edit-service-months-input');
+          var basePrice = priceInput ? parseInt(priceInput.value || 0) : parseInt(box.getAttribute('data-price') || 0);
+          var months = monthsInput ? parseInt(monthsInput.value || 1) : 1;
+          var serviceName = box.value;
+          var type = box.getAttribute('data-type');
+          var isSub = (type === '訂閱服務') || box.getAttribute('data-issub') === 'true';
+
+          selNames.push(serviceName);
+          
+          var detailsArr = [];
+          group.querySelectorAll('.edit-child-box:checked').forEach(function(c){ 
+             var rawChild = c.value;
+             if(rawChild.startsWith('[')) {
+                var parts = rawChild.split('] ');
+                if(parts.length > 1) rawChild = parts.slice(1).join('] ');
+             }
+             detailsArr.push(rawChild.trim());
+          }); 
+
+          servicesMatrix.push({ name: serviceName, type: type, isSub: isSub, basePrice: basePrice, months: months, totalPrice: basePrice * months, details: detailsArr });
+        });
+        
+        data.selectedMainNames = selNames.join(', ');
+        data.selectedServices = JSON.stringify(servicesMatrix);
+
+        window.currentGeneratedData = data;
+        previewBody.innerHTML = generateA4HTML(data, data.projectId);
+        previewArea.style.display = 'block';
+        previewArea.scrollIntoView({ behavior: 'smooth', block: 'end' }); // 平滑滾動確保看到預覽
+      }
     }
-    
-    function closePreviewModal() { 
-      document.getElementById('preview-modal').classList.remove('show'); 
-      document.querySelector('#preview-modal .modal-footer').style.display = 'flex';
+
+    // 收起行內預覽
+    function closeInlinePreview(mode) { 
+      document.getElementById('inline-preview-area-' + mode).style.display = 'none'; 
     }
-    
+
+    // 新建合約送出機制
     function submitClient() {
       var data = window.currentGeneratedData;
-      if (!data) return showToast("系統生成單號錯誤，請關閉後重新預覽提交");
+      if (!data) return showToast("系統生成單號錯誤，請關閉預覽後重試");
       
       data.htmlTemplate = generateA4HTML(data, "{{PROJECT_ID}}");
-
-      document.getElementById('btn-confirm-submit').innerText = "歸檔與分發中..."; document.getElementById('btn-confirm-submit').disabled = true; showToast("系統產生 PDF 並自動分發至專案庫...");
+      var btn = document.getElementById('btn-confirm-submit-new');
+      
+      btn.innerText = "歸檔與分發中..."; 
+      btn.disabled = true; 
+      showToast("系統產生 PDF 並自動分發至專案庫...");
       
       apiCall('submitClientQuote', [data], function(res){ 
         showToast(res.message); 
-        document.getElementById('btn-confirm-submit').innerText = "確認簽約並建檔分發"; 
-        document.getElementById('btn-confirm-submit').disabled = false; 
+        btn.innerText = "確認簽約並建檔分發"; 
+        btn.disabled = false; 
         
         var successHtml = [];
         successHtml.push('<div style="text-align:center; padding: 60px 20px;">');
         successHtml.push('  <h3 style="color: #34c759; margin-bottom: 16px; font-size: 22px;">🎉 合約建檔與專案分發成功！</h3>');
-        successHtml.push('  <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 15px;">請複製以下專屬連結傳送給客戶（客戶點擊即可直接檢視 PDF）：</p>');
+        successHtml.push('  <p style="color: var(--text-muted); margin-bottom: 24px; font-size: 15px;">請複製以下專屬連結傳送給客戶（點擊即可直接檢視 PDF）：</p>');
         successHtml.push('  <div style="display:flex; gap:12px; justify-content:center; align-items:center; max-width: 500px; margin: 0 auto;">');
         successHtml.push('    <input type="text" id="generated-pdf-link" value="' + res.pdfUrl + '" readonly style="flex: 1; background: #ffffff; color: #1d1d1f; border: 1px solid var(--text-main); font-size: 14px; padding: 12px 16px; border-radius: 8px;">');
         successHtml.push('    <button class="primary" style="margin: 0; width: auto; padding: 12px 24px; border-radius: 8px;" onclick="copyPdfLink()">複製連結</button>');
         successHtml.push('  </div></div>');
         
-        document.getElementById('preview-body').innerHTML = successHtml.join('');
-        document.querySelector('#preview-modal .modal-footer').style.display = 'none';
+        document.getElementById('inline-preview-body-new').innerHTML = successHtml.join('');
+        document.getElementById('inline-preview-actions-new').style.display = 'none'; // 成功後隱藏確認按鈕
 
         newSignatureDataUrl = ''; 
         document.getElementById('sig-preview-container').style.display='none'; 
         localStorage.removeItem('ruby_client_autosave'); 
       }, function(err){ 
         showToast('同步失敗：' + err); 
-        document.getElementById('btn-confirm-submit').innerText = "確認簽約並建檔分發"; 
-        document.getElementById('btn-confirm-submit').disabled = false; 
+        btn.innerText = "確認簽約並建檔分發"; 
+        btn.disabled = false; 
+      });
+    }
+
+    // 編輯歷史送出機制
+    function submitEditHistory() {
+      var data = window.currentGeneratedData;
+      if (!data || !data.projectId) return showToast("系統錯誤，請關閉預覽後重試");
+
+      data.htmlTemplate = generateA4HTML(data, data.projectId);
+      var btn = document.getElementById('btn-confirm-submit-edit');
+      
+      btn.innerText = "儲存與產出中..."; 
+      btn.disabled = true; 
+      showToast("系統正默默產生新的 PDF 檔案...");
+      
+      apiCall('updateClientQuoteData', [data.rowId, data.projectId, data], function(newPdfUrl){
+        var record = globalHistoryData.find(function(r){ return r.projectId === data.projectId; });
+        if (record) {
+           record.company = data.company; record.taxId = data.taxId;
+           record.rep = data.rep; record.contact = data.contact;
+           record.phone = data.phone; record.email = data.email; record.address = data.address;
+           record.mainServices = data.selectedMainNames; 
+           record.services = data.selectedServices; 
+           record.terms = data.terms; 
+           record.subtotal = data.subtotal;
+           record.tax = data.tax; record.total = data.total; record.customPrice = data.customPrice;
+           if (newPdfUrl) record.pdfUrl = newPdfUrl;
+        }
+        renderHistoryTable(globalHistoryData);
+        closeInlinePreview('edit');  // 成功後收起行內預覽
+        closeEditHistoryModal();     // 關閉編輯視窗
+        localStorage.removeItem('ruby_edit_draft_' + data.projectId); 
+        showToast("✅ 雲端 PDF 更新成功！");
+        btn.innerText = "確認儲存並產生 PDF"; 
+        btn.disabled = false; 
+      }, function(err){
+        showToast("背景同步失敗：" + err);
+        btn.innerText = "確認儲存並產生 PDF"; 
+        btn.disabled = false; 
       });
     }
 
@@ -1473,6 +1413,10 @@
       document.execCommand('copy');
       showToast('✅ 連結已成功複製，可直接貼給客戶！');
     }
+
+    // =====================================
+    // 編輯歷史紀錄專用草稿儲存系統 (修復 autoSaveEdit 錯誤)
+    // =====================================
 
     function triggerAutoSaveUI(statusId) { var statusEl = document.getElementById(statusId); statusEl.style.opacity = '1'; statusEl.innerText = '已自動儲存'; clearTimeout(autoSaveTimeout); autoSaveTimeout = setTimeout(function(){ statusEl.style.opacity = '0'; }, 2000); }
     
@@ -1672,6 +1616,115 @@
                 showToast("無相符紀錄"); 
             } 
         }); 
+    }
+
+    // 1. 自動儲存編輯中的內容
+    function autoSaveEdit() {
+      var projectId = document.getElementById('edit-history-pid').value;
+      if (!projectId) return; // 如果沒有抓到專案 ID 就不執行
+
+      var checkedItems = [];
+      var customItemPrices = {};
+
+      // 抓取被勾選的服務與細項
+      document.querySelectorAll('#edit-service-list input[type="checkbox"]:checked').forEach(function(box){
+        checkedItems.push(box.value);
+      });
+
+      // 抓取各項目自訂的價格
+      document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input){
+        customItemPrices[input.getAttribute('data-service')] = input.value;
+      });
+
+      // 將表單上所有的資料打包
+      var data = {
+        taxId: document.getElementById('edit-history-taxId').value,
+        company: document.getElementById('edit-history-company').value,
+        rep: document.getElementById('edit-history-rep').value,
+        contact: document.getElementById('edit-history-contact').value,
+        phone: document.getElementById('edit-history-phone').value,
+        email: document.getElementById('edit-history-email').value,
+        address: document.getElementById('edit-history-address').value,
+        customPrice: document.getElementById('edit-custom-price').value,
+        terms: document.getElementById('edit-history-terms').value,
+        checkedItems: checkedItems,
+        customItemPrices: customItemPrices,
+        signature: editSignatureDataUrl // 獨立簽名檔暫存
+      };
+
+      try {
+        // 依照專案 ID 建立專屬草稿並存入瀏覽器
+        localStorage.setItem('ruby_edit_draft_' + projectId, JSON.stringify(data));
+        triggerAutoSaveUI('edit-draft-status');
+      } catch (e) {
+        console.warn("無法自動儲存編輯草稿", e);
+      }
+    }
+
+    // 2. 手動點擊儲存進度
+    function saveEditDraft() {
+      autoSaveEdit();
+      showToast('編輯草稿進度已儲存');
+    }
+
+    // 3. 手動點擊載入草稿
+    function loadEditDraft() {
+      var projectId = document.getElementById('edit-history-pid').value;
+      if (!projectId) return showToast('請先選擇要編輯的專案');
+      autoLoadEditDraftIfExist(projectId, true);
+    }
+
+    // 4. 開啟編輯視窗時，負責將草稿資料還原到畫面上
+    function autoLoadEditDraftIfExist(projectId, isManual) {
+      try {
+        var draftStr = localStorage.getItem('ruby_edit_draft_' + projectId);
+        if (!draftStr) {
+          if (isManual) showToast('找不到此專案的草稿紀錄');
+          return;
+        }
+        var draft = JSON.parse(draftStr);
+
+        // 復原文字欄位
+        if (draft.taxId !== undefined) document.getElementById('edit-history-taxId').value = draft.taxId;
+        if (draft.company !== undefined) document.getElementById('edit-history-company').value = draft.company;
+        if (draft.rep !== undefined) document.getElementById('edit-history-rep').value = draft.rep;
+        if (draft.contact !== undefined) document.getElementById('edit-history-contact').value = draft.contact;
+        if (draft.phone !== undefined) document.getElementById('edit-history-phone').value = draft.phone;
+        if (draft.email !== undefined) document.getElementById('edit-history-email').value = draft.email;
+        if (draft.address !== undefined) document.getElementById('edit-history-address').value = draft.address;
+        if (draft.terms !== undefined) document.getElementById('edit-history-terms').value = draft.terms;
+        if (draft.customPrice !== undefined) document.getElementById('edit-custom-price').value = draft.customPrice;
+
+        // 復原自訂價格
+        if (draft.customItemPrices) {
+          document.querySelectorAll('#edit-service-list .edit-service-price-input').forEach(function(input){
+            var sName = input.getAttribute('data-service');
+            if (draft.customItemPrices[sName] !== undefined) {
+              input.value = draft.customItemPrices[sName];
+            }
+          });
+        }
+
+        // 復原勾選狀態
+        if (draft.checkedItems) {
+          document.querySelectorAll('#edit-service-list input[type="checkbox"]').forEach(function(box){
+            box.checked = draft.checkedItems.includes(box.value);
+          });
+        }
+
+        // 復原簽名狀態
+        if (draft.signature) {
+          editSignatureDataUrl = draft.signature;
+          document.getElementById('edit-sig-preview-img').src = draft.signature;
+          document.getElementById('edit-sig-preview-container').style.display = 'block';
+          document.getElementById('edit-sig-placeholder').style.display = 'none';
+        }
+
+        calcEditTotal(); // 重新計算總金額
+        if (isManual) showToast('草稿已成功載入');
+      } catch (e) {
+        console.error("載入草稿失敗", e);
+      }
     }
 
   </script>
