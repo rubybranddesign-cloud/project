@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>露比設計-報價與專案管理系統</title>
+  <title>露比設計-報價系統</title>
   
   <script src="https://unpkg.com/lucide@latest"></script>
   <link rel="stylesheet" href="https://unpkg.com/mobile-drag-drop@2.3.0-rc.2/default.css">
@@ -468,8 +468,8 @@
     const PROJECT_ID = urlId ? urlId : (rawProjectId.startsWith("<" + "?") ? "" : rawProjectId);
     const GAS_WEB_URL = (rawScriptUrl && !rawScriptUrl.startsWith("<" + "?")) ? rawScriptUrl : "https://script.google.com/macros/s/AKfycbwofB9r5XrFziKtE7SlZjvstgxMq9ZR2ooly2rkW9vRk5XXLvswhyDfj3C0mCYspp4yfQ/exec";
 
-    // ★ 專屬外部 GitHub Pages 網址
-    const EXTERNAL_FRONTEND_URL = "https://alwayslucky2hand-ops.github.io/ruby-quote/"; 
+    // ★ 專屬外部 GitHub Pages 網址 (修正為正確的主網址)
+    const EXTERNAL_FRONTEND_URL = "https://rubybranddesign-cloud.github.io/project/"; 
 
     // ==========================================
     // ★ 全域變數統一宣告區
