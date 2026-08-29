@@ -106,7 +106,7 @@
     /* Filter & Pill Tags */
     .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
     .tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill-tag { padding: 6px 12px; border-radius: 20px; background-color: var(--bg-main); border: 1px solid var(--border-light); font-size: 13px; color: var(--text-sub); cursor: pointer; transition: all 0.2s ease; user-select: none; }
+    .pill-tag { padding: 6px 12px; border-radius: 20px; background-color: var(--bg-main); border: 1px solid var(--border-light); font-size: 13px; color: var(--text-sub); cursor: transition: all 0.2s ease; user-select: none; }
     .pill-tag:hover { border-color: var(--border-dark); }
     .pill-tag.active { background-color: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
 
@@ -295,7 +295,7 @@
               </div>
               <div class="form-group"><label style="font-weight: 600;">公司名稱</label><input type="text" class="form-input" id="client-company" oninput="updateDraftFromGlobals()"></div>
               <div class="form-group"><label style="font-weight: 600;">代表人</label><input type="text" class="form-input" id="client-rep" oninput="updateDraftFromGlobals()"></div>
-              <div class="form-group"><label style="font-weight: 600;">業務聯絡人</label><input type="text" class="form-input" id="client-contact" oninput="updateDraftFromGlobals()"></div>
+              <div class="form-group"><label style="font-weight: 600;">聯絡人</label><input type="text" class="form-input" id="client-contact" oninput="updateDraftFromGlobals()"></div>
               <div class="form-group"><label style="font-weight: 600;">聯繫電話</label><input type="text" class="form-input" id="client-phone" oninput="updateDraftFromGlobals()"></div>
               <div class="form-group"><label style="font-weight: 600;">電子信箱</label><input type="text" class="form-input" id="client-email" oninput="updateDraftFromGlobals()"></div>
               <div class="form-group full-width"><label style="font-weight: 600;">公司地址</label><input type="text" class="form-input" id="client-address" oninput="updateDraftFromGlobals()"></div>
@@ -672,7 +672,7 @@
       showToast('表單與草稿已完全清空', 'success');
     }
 
-    // ★ 終極版面重構：嚴格對齊截圖的表格化 A4 模板
+    // ★ 終極版面重構：嚴格對齊截圖的表格化 A4 模板 (包含新增的「聯絡人」)
     function buildA4Template(data) {
       let quoteItemsHtml = '';
       data.quotes.forEach(q => {
@@ -729,6 +729,7 @@
                 <tr><td style="width: 75px; padding: 4px 0; font-weight: bold;">公司名稱：</td><td style="padding: 4px 0;">${data.client.company}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">統一編號：</td><td style="padding: 4px 0;">${data.client.taxId || '(未提供)'}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">代表人：</td><td style="padding: 4px 0;">${data.client.rep || '(未提供)'}</td></tr>
+                <tr><td style="padding: 4px 0; font-weight: bold;">聯絡人：</td><td style="padding: 4px 0;">${data.client.contact || '(未提供)'}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">聯絡電話：</td><td style="padding: 4px 0;">${data.client.phone || '(未提供)'}</td></tr>
                 <tr><td style="padding: 4px 0; vertical-align: top; font-weight: bold;">地址：</td><td style="padding: 4px 0;">${data.client.address || '(未提供)'}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">Email：</td><td style="padding: 4px 0;">${data.client.email || '(未提供)'}</td></tr>
@@ -740,6 +741,7 @@
                 <tr><td style="width: 75px; padding: 4px 0; font-weight: bold;">公司名稱：</td><td style="padding: 4px 0;">${data.our.company}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">統一編號：</td><td style="padding: 4px 0;">${data.our.taxId}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">代表人：</td><td style="padding: 4px 0;">${data.our.rep}</td></tr>
+                <tr><td style="padding: 4px 0; font-weight: bold;">聯絡人：</td><td style="padding: 4px 0;">${data.our.contact}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">聯絡電話：</td><td style="padding: 4px 0;">${data.our.phone}</td></tr>
                 <tr><td style="padding: 4px 0; vertical-align: top; font-weight: bold;">地址：</td><td style="padding: 4px 0;">${data.our.address}</td></tr>
                 <tr><td style="padding: 4px 0; font-weight: bold;">Email：</td><td style="padding: 4px 0;">${data.our.email}</td></tr>
