@@ -693,10 +693,11 @@
 
       let partyASignHtml = '';
       if (data.clientSignatureImg) {
-         partyASignHtml = `<div style="text-align: right;"><img src="${data.clientSignatureImg}" style="max-width: 100%; height: auto; max-height: 100px; object-fit: contain;"></div>
-                           <div style="text-align: right; font-size: 12px; color: #008800; margin-top: 4px;">線上簽署完畢</div>`;
+         // ★ 簽名圖片放大 2 倍 (max-height: 200px)，並套用截圖規格的綠色字樣
+         partyASignHtml = `<div style="text-align: right; position: relative; margin-top: -20px;"><img src="${data.clientSignatureImg}" style="max-width: 100%; height: auto; max-height: 200px; object-fit: contain; margin-bottom: -10px;"></div>
+                           <div style="text-align: right; font-size: 12px; color: #008800; font-weight: bold; margin-top: 4px;">線上簽署完畢</div>`;
       } else {
-         partyASignHtml = `<div style="text-align: right; color: #999; line-height: 80px;">（待線上簽署）</div>`;
+         partyASignHtml = `<div style="text-align: right; color: #999; line-height: 80px;">(尚未簽名)</div>`;
       }
 
       return `
@@ -716,11 +717,10 @@
             <div style="flex: 1; background: #F8F9FA; padding: 20px; border-radius: 12px;">
               <h3 style="margin-top:0; border-bottom: 1px solid #E5E5E5; padding-bottom: 8px; margin-bottom: 12px; font-size: 15px;">甲方 (委託方)</h3>
               <p style="margin:4px 0;"><strong>公司名稱：</strong>${data.client.company}</p>
-              <p style="margin:4px 0;"><strong>統一編號：</strong>${data.client.taxId}</p>
-              <p style="margin:4px 0;"><strong>代表人：</strong>${data.client.rep}</p>
-              <p style="margin:4px 0;"><strong>聯絡人：</strong>${data.client.contact}</p>
+              <p style="margin:4px 0;"><strong>統一編號：</strong>${data.client.taxId || '(未提供)'}</p>
+              <p style="margin:4px 0;"><strong>代表人：</strong>${data.client.rep || '(未提供)'}</p>
               <p style="margin:4px 0;"><strong>聯絡電話：</strong>${data.client.phone}</p>
-              <p style="margin:4px 0;"><strong>地址：</strong>${data.client.address}</p>
+              <p style="margin:4px 0;"><strong>地址：</strong>${data.client.address || '(未提供)'}</p>
               <p style="margin:4px 0;"><strong>Email：</strong>${data.client.email}</p>
             </div>
             <div style="flex: 1; background: #F8F9FA; padding: 20px; border-radius: 12px;">
@@ -728,7 +728,6 @@
               <p style="margin:4px 0;"><strong>公司名稱：</strong>${data.our.company}</p>
               <p style="margin:4px 0;"><strong>統一編號：</strong>${data.our.taxId}</p>
               <p style="margin:4px 0;"><strong>代表人：</strong>${data.our.rep}</p>
-              <p style="margin:4px 0;"><strong>聯絡人：</strong>${data.our.contact}</p>
               <p style="margin:4px 0;"><strong>聯絡電話：</strong>${data.our.phone}</p>
               <p style="margin:4px 0;"><strong>地址：</strong>${data.our.address}</p>
               <p style="margin:4px 0;"><strong>Email：</strong>${data.our.email}</p>
@@ -750,31 +749,33 @@
             </tbody>
           </table>
 
-          <div style="text-align: right; margin-bottom: 48px; font-size: 14px;">
-            <p style="margin: 4px 0;">報價小計 (未稅): $${Number(data.financials.rawSubtotal).toLocaleString()}</p>
-            ${Number(data.financials.discount) > 0 ? `<p style="margin: 4px 0; color: #D97706;">專案優惠折抵: -$${Number(data.financials.discount).toLocaleString()}</p><p style="margin: 4px 0; border-top: 1px dashed #E5E5E5; padding-top: 4px;">折抵後小計 (計算稅基): $${Number(data.financials.subtotal).toLocaleString()}</p>` : ''}
-            <p style="margin: 4px 0;">營業稅 (5%): ${data.financials.tax}</p>
-            <h2 style="color: #111; border-top: 1px solid #111; padding-top: 8px; margin-top: 8px; word-break: break-all;">專案總計 (含稅): ${data.financials.total}</h2>
+          <h3 style="font-size: 16px; margin-bottom: 12px;">二、專案費用明細</h3>
+          <div style="margin-bottom: 32px; font-size: 14px; line-height: 1.8;">
+            <p style="margin: 4px 0;">銷售額合計 (未稅)：$${Number(data.financials.rawSubtotal).toLocaleString()}</p>
+            ${Number(data.financials.discount) > 0 ? `<p style="margin: 4px 0; color: #D97706;">專案優惠折抵：-$${Number(data.financials.discount).toLocaleString()}</p><p style="margin: 4px 0; border-bottom: 1px dashed #E5E5E5; padding-bottom: 4px; display: inline-block;">折抵後小計 (計算稅基)：$${Number(data.financials.subtotal).toLocaleString()}</p>` : ''}
+            <p style="margin: 4px 0;">營業稅 (5%)：${data.financials.tax}</p>
+            <p style="color: #111; font-weight: bold; font-size: 16px; margin-top: 8px;">總金額 (含稅)：${data.financials.total}</p>
           </div>
 
           <div style="font-size: 13px; line-height: 1.6; margin-bottom: 40px;">
-            <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px;">二、約定條款</h3>
+            <h3 style="border-bottom: 1px solid #ccc; padding-bottom: 4px; margin-bottom: 12px; font-size: 16px;">三、專業約定條款</h3>
             <div style="white-space: pre-wrap; color: #333;">${data.terms || '無'}</div>
           </div>
           
           <div class="party-block">
-            <h3 style="font-size: 16px; margin-bottom: 16px;">三、專案簽署確認</h3>
+            <h3 style="font-size: 16px; margin-bottom: 12px;">四、雙方簽署確認</h3>
+            <p style="font-size: 13px; color: #666; margin-bottom: 16px;">本協議經雙方確認並簽署後正式生效。雙方同意以電子簽章或數位紀錄形式留存，具同等法律效力。</p>
             
             <div style="border: 1px solid #E5E5E5; padding: 20px; border-radius: 12px; margin-bottom: 16px; page-break-inside: avoid;">
               <div class="party-title" style="font-size: 15px; font-weight: bold; margin-bottom: 16px; border-bottom: 1px dashed #ccc; padding-bottom: 8px;">甲方 (委託方) 簽署區</div>
               <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;">
                 <tr>
-                  <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 50%; font-size: 14px;">
+                  <td style="border: none; padding: 0; line-height: 2; vertical-align: middle; width: 40%; font-size: 14px;">
                     <b>公司名稱：</b>${data.client.company}<br>
                     <b>統一編號：</b>${data.client.taxId || '未提供'}<br>
                     <b>代表人：</b>${data.client.rep || '未提供'}
                   </td>
-                  <td style="border: none; padding: 0; vertical-align: bottom; width: 50%;">
+                  <td style="border: none; padding: 0; vertical-align: middle; text-align: right; width: 60%;">
                     ${partyASignHtml}
                   </td>
                 </tr>
@@ -785,12 +786,12 @@
               <div class="party-title" style="font-size: 15px; font-weight: bold; margin-bottom: 16px; border-bottom: 1px dashed #ccc; padding-bottom: 8px;">乙方 (執行方) 簽署區</div>
               <table style="width: 100%; border: none; margin: 0; padding: 0; table-layout: fixed;">
                 <tr>
-                  <td style="border: none; padding: 0; line-height: 2; vertical-align: top; width: 45%; font-size: 14px;">
+                  <td style="border: none; padding: 0; line-height: 2; vertical-align: middle; width: 45%; font-size: 14px;">
                     <b>公司名稱：</b>露比設計有限公司<br>
                     <b>統一編號：</b>89190593<br>
                     <b>代表人：</b>廖怡甄
                   </td>
-                  <td style="border: none; padding: 0; text-align: right; vertical-align: bottom; width: 55%;">
+                  <td style="border: none; padding: 0; text-align: right; vertical-align: middle; width: 55%;">
                     <img src="${sealUrl}" style="width: 100%; max-width: 250px; height: auto; object-fit: contain; margin-right: 5px; margin-bottom: -10px;">
                   </td>
                 </tr>
