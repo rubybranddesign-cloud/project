@@ -124,7 +124,7 @@
     .accordion-icon { transition: transform 0.3s ease; flex-shrink: 0; }
     .accordion-item.expanded > .accordion-header > .accordion-icon { transform: rotate(180deg); }
     .accordion-content { background-color: var(--bg-card); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; opacity: 0; }
-    .accordion-item.expanded > .accordion-content { padding: var(--space-16); max-height: 4000px; opacity: 1; border-top: 1px solid var(--border-light); }
+    .accordion-item.expanded > .accordion-content { padding: var(--space-16); max-height: 5000px; opacity: 1; border-top: 1px solid var(--border-light); }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
@@ -1410,7 +1410,6 @@
       const quoteList = appStore.get('quoteSetupList');
       const costList = appStore.get('costSetupList');
 
-      // ★ 獲取報價項目的 checked 細項說明，寫入雲端以供對齊新版表格
       Object.keys(globalSelections.quote).forEach(rowId => {
          const item = quoteList.find(i => String(i._rowId) === String(rowId));
          if (item) {
@@ -1619,33 +1618,6 @@
         else if (status === "已簽約") badgeClass = "badge-signed"; 
         else if (status === "已請款") badgeClass = "badge-invoiced";
 
-        let pastVersionsHtml = '';
-        if (versions.length > 1) {
-          pastVersionsHtml = `
-            <div style="margin-top: 16px; border-top: 1px dashed var(--border-light); padding-top: 12px;">
-              <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding: 6px 0;" onclick="toggleAccordion('hist-subvers-${latest._rowId}')">
-                <span style="font-size: 13px; font-weight: 600; color: var(--text-sub);">
-                  <i data-lucide="layers" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 查看歷史版本變更 (共 ${versions.length - 1} 筆歷史紀錄)
-                </span>
-                <i data-lucide="chevron-down" class="accordion-icon" style="width:16px;height:16px;"></i>
-              </div>
-              <div class="accordion-content" id="hist-subvers-${latest._rowId}" style="background: transparent; padding-top: 8px;">`;
-          
-          for (let v = 1; v < versions.length; v++) {
-            const vItem = versions[v];
-            pastVersionsHtml += `
-              <div style="background: #FFF; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
-                <div>
-                  <span class="badge badge-draft" style="font-size:10px; margin-right:6px;">第 ${versions.length - v} 版</span>
-                  <span style="font-weight:600;">$${Number(vItem["原價總計"]||0).toLocaleString()}</span>
-                  <span style="color:var(--text-mute); margin-left:8px;">${vItem["簽約時間"] || "未簽約"}</span>
-                </div>
-                <button class="btn-secondary btn-sm" style="height:26px; padding:0 8px; font-size:11px;" onclick="reloadQuote(${vItem._rowId})">載入此版</button>
-              </div>`;
-          }
-          pastVersionsHtml += `</div></div>`;
-        }
-
         html += `
           <div class="accordion-item" id="hist-acc-${rowId}" style="margin-bottom: 12px;">
             <div class="accordion-header" onclick="toggleHistoryAccordion(${rowId})">
@@ -1662,9 +1634,31 @@
                  <div style="color: var(--text-sub); font-size: 13px;">總計：$${Number(latest["原價總計"] || 0).toLocaleString()} | 簽約：${latest["簽約時間"] ? new Date(latest["簽約時間"]).toLocaleDateString('zh-TW') : "未簽約"}</div>
               </div>
             </div>
+            
             <div class="accordion-content" id="hist-content-${rowId}">
             </div>
-            ${pastVersionsHtml}
+
+            ${versions.length > 1 ? `
+            <div class="accordion-item" id="hist-subvers-${rowId}" style="margin: 0; border: none; border-top: 1px dashed var(--border-light); border-radius: 0;">
+              <div class="accordion-header" onclick="toggleAccordion('hist-subvers-${rowId}')" style="background: transparent; padding: 12px 16px;">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-sub);">
+                  <i data-lucide="layers" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 查看歷史版本變更 (共 ${versions.length - 1} 筆)
+                </span>
+                <i data-lucide="chevron-down" class="accordion-icon" style="width:16px;height:16px;"></i>
+              </div>
+              <div class="accordion-content" style="padding: 0 16px 16px 16px; background: transparent; border: none;">
+                 ${versions.slice(1).map((vItem, idx) => `
+                   <div style="background: #FFF; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+                     <div>
+                       <span class="badge badge-draft" style="font-size:10px; margin-right:6px;">第 ${versions.length - 1 - idx} 版</span>
+                       <span style="font-weight:600;">$${Number(vItem["原價總計"]||0).toLocaleString()}</span>
+                       <span style="color:var(--text-mute); margin-left:8px;">${vItem["簽約時間"] || "未簽約"}</span>
+                     </div>
+                     <button class="btn-secondary btn-sm" style="height:26px; padding:0 8px; font-size:11px;" onclick="reloadQuote(${vItem._rowId})">載入此版</button>
+                   </div>
+                 `).join('')}
+              </div>
+            </div>` : ''}
           </div>`;
       });
       
@@ -1686,181 +1680,189 @@
     }
 
     function renderHistoryPreview(rowId) {
-      const history = appStore.get('historyList').find(h => h._rowId === rowId);
-      if (!history) return;
-      const contentDiv = document.getElementById(`hist-content-${rowId}`);
-      const status = history["專案狀態"];
-      
-      let actionsHtml = '';
-      let vaultHtml = '';
-      let docs = [];
-      try { docs = JSON.parse(history["文件庫JSON"] || '[]'); } catch(e){}
+      try {
+          const history = appStore.get('historyList').find(h => h._rowId === rowId);
+          if (!history) return;
+          const contentDiv = document.getElementById(`hist-content-${rowId}`);
+          if (!contentDiv) return;
 
-      if (docs.length === 0) {
-          if (history["請款單PDF網址"]) docs.push({ type: '歷史請款單', name: '請款單 (舊版紀錄)', url: history["請款單PDF網址"] });
-          if (history["簽約檔案PDF"] || history["簽約合約PDF網址"]) docs.push({ type: '歷史合約', name: '已簽署合約 (舊版紀錄)', url: history["簽約檔案PDF"] || history["簽約合約PDF網址"] });
-      }
+          const status = history["專案狀態"];
+          
+          let actionsHtml = '';
+          let vaultHtml = '';
+          let docs = [];
+          try { docs = JSON.parse(history["文件庫JSON"] || '[]'); } catch(e){}
 
-      if (docs.length > 0) {
-          const latestDoc = docs[0];
-          let historyDocsHtml = '';
-          if (docs.length > 1) {
-              historyDocsHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
-                  <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">以前產出的歷史紀錄：</div>`;
-              for (let i = 1; i < docs.length; i++) {
-                  historyDocsHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; font-size: 13px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-light);">
-                      <span style="color: var(--text-sub); display:flex; flex-direction:column; gap:2px;">
-                          <span style="font-weight:600; color:var(--text-main); font-size:11px;">${docs[i].type}</span>
-                          <span>${docs[i].name}</span>
-                      </span>
-                      <a href="${docs[i].url}" target="_blank" class="btn-secondary btn-sm" style="height: 28px; padding: 0 12px; font-size: 12px; text-decoration: none;">瀏覽</a>
-                  </div>`;
-              }
-              historyDocsHtml += `</div>`;
+          if (docs.length === 0) {
+              if (history["請款單PDF網址"]) docs.push({ type: '歷史請款單', name: '請款單 (舊版紀錄)', url: history["請款單PDF網址"] });
+              if (history["簽約檔案PDF"] || history["簽約合約PDF網址"]) docs.push({ type: '歷史合約', name: '已簽署合約 (舊版紀錄)', url: history["簽約檔案PDF"] || history["簽約合約PDF網址"] });
           }
-          vaultHtml = `
-          <div style="margin-top: 16px; margin-bottom: 16px; padding: 16px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border-light);">
-              <h4 style="margin-bottom: 12px; font-size:15px; display:flex; align-items:center; gap:8px;">
-                  <i data-lucide="folder-open" style="width:18px;height:18px;color:var(--primary-color);"></i> 專案文件庫
-              </h4>
-              <div style="display:flex; align-items:center; justify-content:space-between; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
-                  <div style="display:flex; flex-direction:column; gap:4px; flex: 1; padding-right: 12px;">
-                      <span style="font-size: 12px; font-weight: 600; color: #D97706;">⭐ 最新產出 (${latestDoc.type})</span>
-                      <span style="font-size: 14px; word-break: break-all;">${latestDoc.name}</span>
-                  </div>
-                  <a href="${latestDoc.url}" target="_blank" class="btn-primary" style="text-decoration:none; white-space: nowrap;">
-                      <i data-lucide="external-link" style="width:16px;height:16px;"></i> 立即瀏覽
-                  </a>
-              </div>
-              ${historyDocsHtml}
-          </div>`;
-      } else {
-          vaultHtml = `<div style="margin-top: 16px; margin-bottom: 16px; padding: 16px; background: #FAFAFA; border-radius: 8px; border: 1px dashed #ccc; text-align: center; color: #999; font-size: 13px;">目前尚無產出任何 PDF 文件</div>`;
-      }
 
-      if (status === '已報價') {
-          const baseUrl = (typeof EXTERNAL_FRONTEND_URL !== 'undefined' && EXTERNAL_FRONTEND_URL.trim() !== "") ? EXTERNAL_FRONTEND_URL : GAS_WEB_URL;
-          const signUrl = baseUrl.includes('?') ? `${baseUrl}&p=sign&id=${history["專案編號"]}` : `${baseUrl}?p=sign&id=${history["專案編號"]}`;
+          if (docs.length > 0) {
+              const latestDoc = docs[0];
+              let historyDocsHtml = '';
+              if (docs.length > 1) {
+                  historyDocsHtml = `<div style="margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border-light);">
+                      <div style="font-size: 12px; color: var(--text-sub); margin-bottom: 8px;">以前產出的歷史紀錄：</div>`;
+                  for (let i = 1; i < docs.length; i++) {
+                      historyDocsHtml += `<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 8px; font-size: 13px; background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid var(--border-light);">
+                          <span style="color: var(--text-sub); display:flex; flex-direction:column; gap:2px;">
+                              <span style="font-weight:600; color:var(--text-main); font-size:11px;">${docs[i].type || '文件'}</span>
+                              <span>${docs[i].name || '未命名'}</span>
+                          </span>
+                          <a href="${docs[i].url || '#'}" target="_blank" class="btn-secondary btn-sm" style="height: 28px; padding: 0 12px; font-size: 12px; text-decoration: none;">瀏覽</a>
+                      </div>`;
+                  }
+                  historyDocsHtml += `</div>`;
+              }
+              vaultHtml = `
+              <div style="margin-top: 16px; margin-bottom: 16px; padding: 16px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border-light);">
+                  <h4 style="margin-bottom: 12px; font-size:15px; display:flex; align-items:center; gap:8px;">
+                      <i data-lucide="folder-open" style="width:18px;height:18px;color:var(--primary-color);"></i> 專案文件庫
+                  </h4>
+                  <div style="display:flex; align-items:center; justify-content:space-between; background: #fff; padding: 12px; border-radius: 8px; border: 1px solid var(--border-light); box-shadow: 0 2px 4px rgba(0,0,0,0.02);">
+                      <div style="display:flex; flex-direction:column; gap:4px; flex: 1; padding-right: 12px;">
+                          <span style="font-size: 12px; font-weight: 600; color: #D97706;">⭐ 最新產出 (${latestDoc.type || '文件'})</span>
+                          <span style="font-size: 14px; word-break: break-all;">${latestDoc.name || '未命名'}</span>
+                      </div>
+                      <a href="${latestDoc.url || '#'}" target="_blank" class="btn-primary" style="text-decoration:none; white-space: nowrap;">
+                          <i data-lucide="external-link" style="width:16px;height:16px;"></i> 立即瀏覽
+                      </a>
+                  </div>
+                  ${historyDocsHtml}
+              </div>`;
+          } else {
+              vaultHtml = `<div style="margin-top: 16px; margin-bottom: 16px; padding: 16px; background: #FAFAFA; border-radius: 8px; border: 1px dashed #ccc; text-align: center; color: #999; font-size: 13px;">目前尚無產出任何 PDF 文件</div>`;
+          }
+
+          if (status === '已報價') {
+              const baseUrl = (typeof EXTERNAL_FRONTEND_URL !== 'undefined' && EXTERNAL_FRONTEND_URL.trim() !== "") ? EXTERNAL_FRONTEND_URL : GAS_WEB_URL;
+              const signUrl = baseUrl.includes('?') ? `${baseUrl}&p=sign&id=${history["專案編號"]}` : `${baseUrl}?p=sign&id=${history["專案編號"]}`;
+              
+              const clientName = history["公司名稱"];
+              const defaultSubject = `【報價單】露比設計-${clientName} 專案合約線上簽署`;
+              const docUrl = docs.length > 0 ? docs[0].url : '';
+
+              actionsHtml = `
+                <div style="margin-top: 8px;">
+                   <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
+                      <button class="btn-primary btn-sm" id="btn-gen-quote-hist-${rowId}" onclick="generateQuotePdfFromHistory(${rowId})">
+                         <i data-lucide="file-text" style="width:14px;height:14px;"></i> 產生正式報價單 PDF
+                      </button>
+                      <button class="btn-secondary btn-sm" onclick="reloadQuote(${rowId})">
+                         <i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯
+                      </button>
+                   </div>
+                   
+                   ${vaultHtml}
+
+                   <div style="padding: 16px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border-light);">
+                      <h4 style="margin-bottom: 8px; font-size:14px;">🔗 專屬線上簽約網址</h4>
+                      <div style="display:flex; align-items:center; gap:8px; margin-bottom: 16px;">
+                        <input type="text" id="hist-sign-url-${rowId}" value="${signUrl}" class="form-input" readonly style="flex:1; background:var(--bg-main);">
+                        <button class="btn-secondary" onclick="copyToClipboard('hist-sign-url-${rowId}')"><i data-lucide="copy" style="width:16px;height:16px;"></i> 複製</button>
+                        <a href="${signUrl}" target="_blank" class="btn-secondary"><i data-lucide="external-link" style="width:16px;height:16px;"></i> 簽約</a>
+                      </div>
+                      
+                      <h4 style="margin-bottom: 8px; font-size:14px;">📧 寄送報價單與簽約網址</h4>
+                      <div class="form-group" style="margin-bottom: 8px;">
+                        <div class="combobox-container">
+                          <input type="text" class="form-input" id="hist-to-${rowId}" value="${history["電子信箱"]||''}" placeholder="收件人 Email" onfocus="showEmailHistory('to', 'hist-to-${rowId}', 'hist-to-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-to-drop-${rowId}')">
+                          <div id="hist-to-drop-${rowId}" class="combobox-dropdown"></div>
+                        </div>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 8px;">
+                        <div class="combobox-container">
+                          <input type="text" class="form-input" id="hist-subj-${rowId}" value="${defaultSubject}" onfocus="showEmailHistory('subject', 'hist-subj-${rowId}', 'hist-subj-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-subj-drop-${rowId}')">
+                          <div id="hist-subj-drop-${rowId}" class="combobox-dropdown"></div>
+                        </div>
+                      </div>
+                      <div class="form-group" style="margin-bottom: 8px;">
+                        <div class="combobox-container">
+                          <textarea class="form-textarea" id="hist-body-${rowId}" placeholder="信件內文..." style="min-height:100px;" onfocus="showEmailHistory('body', 'hist-body-${rowId}', 'hist-body-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-body-drop-${rowId}')"></textarea>
+                          <div id="hist-body-drop-${rowId}" class="combobox-dropdown"></div>
+                        </div>
+                      </div>
+                      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
+                        <button class="btn-secondary" onclick="generateAiEmailForHistory(${rowId}, '合約簽署與報價單', '${signUrl}')" id="btn-hist-ai-${rowId}"><i data-lucide="sparkles" style="width:16px;height:16px;"></i> AI 一鍵撰寫</button>
+                        <button class="btn-primary" onclick="sendHistEmailAction(${rowId}, '${docUrl}')" id="btn-hist-send-${rowId}"><i data-lucide="send" style="width:16px;height:16px;"></i> 確認寄出</button>
+                      </div>
+                   </div>
+                </div>`;
+
+          } else if (status === '已簽約' || status === '已請款') {
+              const companyName = history["公司名稱"];
+              const docUrl = docs.length > 0 ? docs[0].url : '';
+              
+              actionsHtml = `
+                <div style="margin-top: 16px;">
+                   <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                      <button class="btn-secondary btn-sm" onclick="reloadQuote(${rowId})">
+                         <i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯
+                      </button>
+                   </div>
+                   
+                   ${vaultHtml}
+
+                   <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:var(--bg-hover); padding:12px; border-radius:8px; border:1px solid var(--border-light);">
+                      <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-weight:600; font-size:13px;">選擇請款單類型：</span>
+                        <select class="form-select" id="hist-inv-type-${rowId}" style="width:160px; height:36px; padding:0 8px;" onchange="updateHistoryPreviewHtml(${rowId})">
+                          <option value="1">100% 全額請款單</option>
+                          <option value="0.5-deposit">50% 訂金請款單</option>
+                          <option value="0.5-final">50% 尾款請款單</option>
+                          <option value="0.3-deposit">30% 訂金請款單</option>
+                          <option value="0.7-final">70% 尾款請款單</option>
+                        </select>
+                      </div>
+                      <button class="btn-primary" onclick="generateInvoicePdfInline(${rowId}, '${companyName}')" id="btn-hist-pdf-${rowId}"><i data-lucide="download" style="width:16px;height:16px;"></i> 產生請款單並儲存</button>
+                   </div>
+                   
+                   <div id="hist-preview-area-${rowId}" style="max-height: 400px; overflow-y: auto; overflow-x: auto; background: #e5e5e5; padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); text-align: center;"></div>
+
+                   <div style="margin-top:16px; border-top: 1px dashed var(--border-light); padding-top:16px;">
+                     <h4 style="margin-bottom: 8px;">📧 寄送請款單</h4>
+                     <div class="form-group" style="margin-bottom: 8px;">
+                       <div class="combobox-container">
+                         <input type="text" class="form-input" id="hist-to-${rowId}" value="${history["電子信箱"]||''}" placeholder="收件人 Email" onfocus="showEmailHistory('to', 'hist-to-${rowId}', 'hist-to-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-to-drop-${rowId}')">
+                         <div id="hist-to-drop-${rowId}" class="combobox-dropdown"></div>
+                       </div>
+                     </div>
+                     <div class="form-group" style="margin-bottom: 8px;">
+                       <div class="combobox-container">
+                         <input type="text" class="form-input" id="hist-subj-${rowId}" onfocus="showEmailHistory('subject', 'hist-subj-${rowId}', 'hist-subj-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-subj-drop-${rowId}')">
+                         <div id="hist-subj-drop-${rowId}" class="combobox-dropdown"></div>
+                       </div>
+                     </div>
+                     <div class="form-group" style="margin-bottom: 8px;">
+                       <div class="combobox-container">
+                         <textarea class="form-textarea" id="hist-body-${rowId}" placeholder="信件內文..." style="min-height:100px;" onfocus="showEmailHistory('body', 'hist-body-${rowId}', 'hist-body-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-body-drop-${rowId}')"></textarea>
+                         <div id="hist-body-drop-${rowId}" class="combobox-dropdown"></div>
+                       </div>
+                     </div>
+                     <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
+                        <button class="btn-secondary" onclick="generateAiEmailForHistory(${rowId}, '請款單')" id="btn-hist-ai-${rowId}"><i data-lucide="sparkles" style="width:16px;height:16px;"></i> AI 一鍵撰寫</button>
+                        <button class="btn-primary" onclick="sendHistEmailAction(${rowId}, '${docUrl}')" id="btn-hist-send-${rowId}"><i data-lucide="send" style="width:16px;height:16px;"></i> 確認寄出</button>
+                     </div>
+                   </div>
+                </div>`;
+          } else {
+              actionsHtml = `
+                ${vaultHtml}
+                <div style="text-align:right; margin-top:16px;">
+                   <button class="btn-secondary" onclick="reloadQuote(${rowId})"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯</button>
+                </div>`;
+          }
+
+          contentDiv.innerHTML = actionsHtml;
           
-          const clientName = history["公司名稱"];
-          const defaultSubject = `【報價單】露比設計-${clientName} 專案合約線上簽署`;
-
-          actionsHtml = `
-            <div style="margin-top: 8px;">
-               <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
-                  <button class="btn-primary btn-sm" id="btn-gen-quote-hist-${rowId}" onclick="generateQuotePdfFromHistory(${rowId})">
-                     <i data-lucide="file-text" style="width:14px;height:14px;"></i> 產生正式報價單 PDF
-                  </button>
-                  <button class="btn-secondary btn-sm" onclick="reloadQuote(${rowId})">
-                     <i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯
-                  </button>
-               </div>
-               
-               ${vaultHtml}
-
-               <div style="padding: 16px; background: var(--bg-hover); border-radius: 8px; border: 1px solid var(--border-light);">
-                  <h4 style="margin-bottom: 8px; font-size:14px;">🔗 專屬線上簽約網址</h4>
-                  <div style="display:flex; align-items:center; gap:8px; margin-bottom: 16px;">
-                    <input type="text" id="hist-sign-url-${rowId}" value="${signUrl}" class="form-input" readonly style="flex:1; background:var(--bg-main);">
-                    <button class="btn-secondary" onclick="copyToClipboard('hist-sign-url-${rowId}')"><i data-lucide="copy" style="width:16px;height:16px;"></i> 複製</button>
-                    <a href="${signUrl}" target="_blank" class="btn-secondary"><i data-lucide="external-link" style="width:16px;height:16px;"></i> 簽約</a>
-                  </div>
-                  
-                  <h4 style="margin-bottom: 8px; font-size:14px;">📧 寄送報價單與簽約網址</h4>
-                  <div class="form-group" style="margin-bottom: 8px;">
-                    <div class="combobox-container">
-                      <input type="text" class="form-input" id="hist-to-${rowId}" value="${history["電子信箱"]||''}" placeholder="收件人 Email" onfocus="showEmailHistory('to', 'hist-to-${rowId}', 'hist-to-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-to-drop-${rowId}')">
-                      <div id="hist-to-drop-${rowId}" class="combobox-dropdown"></div>
-                    </div>
-                  </div>
-                  <div class="form-group" style="margin-bottom: 8px;">
-                    <div class="combobox-container">
-                      <input type="text" class="form-input" id="hist-subj-${rowId}" value="${defaultSubject}" onfocus="showEmailHistory('subject', 'hist-subj-${rowId}', 'hist-subj-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-subj-drop-${rowId}')">
-                      <div id="hist-subj-drop-${rowId}" class="combobox-dropdown"></div>
-                    </div>
-                  </div>
-                  <div class="form-group" style="margin-bottom: 8px;">
-                    <div class="combobox-container">
-                      <textarea class="form-textarea" id="hist-body-${rowId}" placeholder="信件內文..." style="min-height:100px;" onfocus="showEmailHistory('body', 'hist-body-${rowId}', 'hist-body-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-body-drop-${rowId}')"></textarea>
-                      <div id="hist-body-drop-${rowId}" class="combobox-dropdown"></div>
-                    </div>
-                  </div>
-                  <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
-                    <button class="btn-secondary" onclick="generateAiEmailForHistory(${rowId}, '合約簽署與報價單', '${signUrl}')" id="btn-hist-ai-${rowId}"><i data-lucide="sparkles" style="width:16px;height:16px;"></i> AI 一鍵撰寫</button>
-                    <button class="btn-primary" onclick="sendHistEmailAction(${rowId}, '${signUrl}')" id="btn-hist-send-${rowId}"><i data-lucide="send" style="width:16px;height:16px;"></i> 確認寄出</button>
-                  </div>
-               </div>
-            </div>`;
-
-      } else if (status === '已簽約' || status === '已請款') {
-          const companyName = history["公司名稱"];
-          
-          actionsHtml = `
-            <div style="margin-top: 16px;">
-               <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
-                  <button class="btn-secondary btn-sm" onclick="reloadQuote(${rowId})">
-                     <i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯
-                  </button>
-               </div>
-               
-               ${vaultHtml}
-
-               <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:var(--bg-hover); padding:12px; border-radius:8px; border:1px solid var(--border-light);">
-                  <div style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-weight:600; font-size:13px;">選擇請款單類型：</span>
-                    <select class="form-select" id="hist-inv-type-${rowId}" style="width:160px; height:36px; padding:0 8px;" onchange="updateHistoryPreviewHtml(${rowId})">
-                      <option value="1">100% 全額請款單</option>
-                      <option value="0.5-deposit">50% 訂金請款單</option>
-                      <option value="0.5-final">50% 尾款請款單</option>
-                      <option value="0.3-deposit">30% 訂金請款單</option>
-                      <option value="0.7-final">70% 尾款請款單</option>
-                    </select>
-                  </div>
-                  <button class="btn-primary" onclick="generateInvoicePdfInline(${rowId}, '${companyName}')" id="btn-hist-pdf-${rowId}"><i data-lucide="download" style="width:16px;height:16px;"></i> 產生請款單並儲存</button>
-               </div>
-               
-               <div id="hist-preview-area-${rowId}" style="max-height: 400px; overflow-y: auto; overflow-x: auto; background: #e5e5e5; padding: 20px; border-radius: 8px; border: 1px solid var(--border-light); text-align: center;"></div>
-
-               <div style="margin-top:16px; border-top: 1px dashed var(--border-light); padding-top:16px;">
-                 <h4 style="margin-bottom: 8px;">📧 寄送請款單</h4>
-                 <div class="form-group" style="margin-bottom: 8px;">
-                   <div class="combobox-container">
-                     <input type="text" class="form-input" id="hist-to-${rowId}" value="${history["電子信箱"]||''}" placeholder="收件人 Email" onfocus="showEmailHistory('to', 'hist-to-${rowId}', 'hist-to-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-to-drop-${rowId}')">
-                     <div id="hist-to-drop-${rowId}" class="combobox-dropdown"></div>
-                   </div>
-                 </div>
-                 <div class="form-group" style="margin-bottom: 8px;">
-                   <div class="combobox-container">
-                     <input type="text" class="form-input" id="hist-subj-${rowId}" onfocus="showEmailHistory('subject', 'hist-subj-${rowId}', 'hist-subj-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-subj-drop-${rowId}')">
-                     <div id="hist-subj-drop-${rowId}" class="combobox-dropdown"></div>
-                   </div>
-                 </div>
-                 <div class="form-group" style="margin-bottom: 8px;">
-                   <div class="combobox-container">
-                     <textarea class="form-textarea" id="hist-body-${rowId}" placeholder="信件內文..." style="min-height:100px;" onfocus="showEmailHistory('body', 'hist-body-${rowId}', 'hist-body-drop-${rowId}')" onblur="hideTypeDropdownDelayed('hist-body-drop-${rowId}')"></textarea>
-                     <div id="hist-body-drop-${rowId}" class="combobox-dropdown"></div>
-                   </div>
-                 </div>
-                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; flex-wrap:wrap; gap:8px;">
-                    <button class="btn-secondary" onclick="generateAiEmailForHistory(${rowId}, '請款單')" id="btn-hist-ai-${rowId}"><i data-lucide="sparkles" style="width:16px;height:16px;"></i> AI 一鍵撰寫</button>
-                    <button class="btn-primary" onclick="sendHistEmailAction(${rowId}, (docs.length > 0 ? docs[0].url : null))" id="btn-hist-send-${rowId}"><i data-lucide="send" style="width:16px;height:16px;"></i> 確認寄出</button>
-                 </div>
-               </div>
-            </div>`;
-      } else {
-          actionsHtml = `
-            ${vaultHtml}
-            <div style="text-align:right; margin-top:16px;">
-               <button class="btn-secondary" onclick="reloadQuote(${rowId})"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯</button>
-            </div>`;
+          if (status === '已簽約' || status === '已請款') {
+              updateHistoryPreviewHtml(rowId);
+          }
+          lucide.createIcons();
+      } catch(e) {
+          console.error("renderHistoryPreview exception:", e);
       }
-
-      contentDiv.innerHTML = actionsHtml;
-      
-      if (status === '已簽約' || status === '已請款') {
-          updateHistoryPreviewHtml(rowId);
-      }
-      lucide.createIcons();
     }
 
     function updateHistoryPreviewHtml(rowId) {
@@ -1878,7 +1880,10 @@
        
        const subjInput = document.getElementById(`hist-subj-${rowId}`);
        if (subjInput) {
-           const typeText = typeSelect.options[typeSelect.selectedIndex].text;
+           let typeText = '請款單';
+           if (typeSelect && typeSelect.options && typeSelect.selectedIndex >= 0) {
+               typeText = typeSelect.options[typeSelect.selectedIndex].text;
+           }
            const signDateStr = history["簽約時間"] ? new Date(history["簽約時間"]).toLocaleDateString('zh-TW') : new Date().toLocaleDateString('zh-TW');
            subjInput.value = `【${typeText}】露比設計請款單-${history["公司名稱"]}-成交日${signDateStr}`;
        }
@@ -2041,7 +2046,10 @@
       if (!htmlContent) return showToast('無法獲取 HTML 內容', 'error');
 
       const typeSelect = document.getElementById(`hist-inv-type-${rowId}`);
-      const typeText = typeSelect ? typeSelect.options[typeSelect.selectedIndex].text : '請款單';
+      let typeText = '請款單';
+      if(typeSelect && typeSelect.options && typeSelect.selectedIndex >= 0) {
+          typeText = typeSelect.options[typeSelect.selectedIndex].text;
+      }
 
       const taxId = history["統一編號"] || '00000000';
       const folderName = `${taxId}_${companyName}`;
@@ -2072,7 +2080,9 @@
       
       if (contextType === '請款單') {
          const typeSelect = document.getElementById(`hist-inv-type-${rowId}`);
-         if (typeSelect) typeContext = typeSelect.options[typeSelect.selectedIndex].text;
+         if (typeSelect && typeSelect.options && typeSelect.selectedIndex >= 0) {
+             typeContext = typeSelect.options[typeSelect.selectedIndex].text;
+         }
       }
 
       const btn = document.getElementById(`btn-hist-ai-${rowId}`);
@@ -2099,7 +2109,7 @@
       const to = document.getElementById(`hist-to-${rowId}`).value.trim();
       const subject = document.getElementById(`hist-subj-${rowId}`).value.trim();
       const body = document.getElementById(`hist-body-${rowId}`).value;
-      const pdfUrl = forceAttachUrl || document.getElementById(`hist-pdf-url-${rowId}`).value;
+      const pdfUrl = forceAttachUrl || document.getElementById(`hist-pdf-url-${rowId}`)?.value || '';
       
       if (!to) return showToast('請輸入收件人 Email', 'error');
 
