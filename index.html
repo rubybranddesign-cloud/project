@@ -106,7 +106,7 @@
     /* Filter & Pill Tags */
     .filter-bar { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; }
     .tag-container { display: flex; flex-wrap: wrap; gap: 8px; }
-    .pill-tag { padding: 6px 12px; border-radius: 20px; background-color: var(--bg-main); border: 1px solid var(--border-light); font-size: 13px; color: var(--text-sub); cursor: transition: all 0.2s ease; user-select: none; }
+    .pill-tag { padding: 6px 12px; border-radius: 20px; background-color: var(--bg-main); border: 1px solid var(--border-light); font-size: 13px; color: var(--text-sub); cursor: pointer; transition: all 0.2s ease; user-select: none; }
     .pill-tag:hover { border-color: var(--border-dark); }
     .pill-tag.active { background-color: var(--text-main); color: var(--bg-main); border-color: var(--text-main); }
 
@@ -124,7 +124,7 @@
     .accordion-icon { transition: transform 0.3s ease; flex-shrink: 0; }
     .accordion-item.expanded > .accordion-header > .accordion-icon { transform: rotate(180deg); }
     .accordion-content { background-color: var(--bg-card); max-height: 0; overflow: hidden; transition: max-height 0.3s ease, padding 0.3s ease; opacity: 0; }
-    .accordion-item.expanded > .accordion-content { padding: var(--space-16); max-height: 3500px; opacity: 1; border-top: 1px solid var(--border-light); }
+    .accordion-item.expanded > .accordion-content { padding: var(--space-16); max-height: 4000px; opacity: 1; border-top: 1px solid var(--border-light); }
 
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .form-group { display: flex; flex-direction: column; gap: 8px; }
@@ -273,7 +273,7 @@
 
         <!-- View 2: 報價評估 (Quote Evaluation View) -->
         <div id="view-quote" class="view-section">
-          <div class="view-header"><h1>客戶建檔報價</h1></div>
+          <div class="view-header"><h1 id="quote-view-title">客戶建檔報價</h1></div>
           <div class="card">
             <h3 class="section-title">我方資訊建檔</h3>
             <div class="form-grid">
@@ -345,7 +345,7 @@
                 <button class="btn-secondary" onclick="clearQuoteDraft()" id="btn-clear-draft"><i data-lucide="trash-2" style="width:16px;height:16px;"></i> 清空草稿</button>
                 <button class="btn-secondary" onclick="previewA4QuoteInline()" id="btn-preview-a4"><i data-lucide="file-text" style="width:16px;height:16px;"></i> 預覽報價單 (A4)</button>
                 <button class="btn-secondary" onclick="saveQuote('draft')" id="btn-save-draft">雲端儲存 (草稿)</button>
-                <button class="btn-primary" onclick="saveQuote('quoted')" id="btn-save-final"><i data-lucide="link" style="width:16px;height:16px;"></i> 確認產出報價網址</button>
+                <button class="btn-primary" onclick="saveQuote('quoted')" id="btn-save-final"><i data-lucide="link" style="width:16px;height:16px;"></i> 確認儲存並產出</button>
             </div>
           </div>
           <div id="quote-inline-preview-container" class="inline-preview-container">
@@ -378,7 +378,7 @@
                 <option value="已簽約">已簽約</option>
                 <option value="已請款">已請款</option>
               </select>
-              <button class="btn-secondary btn-sm" style="height: 36px;" onclick="loadHistory()"><i data-lucide="refresh-cw"></i> 重整</button>
+              <button class="btn-secondary btn-sm" style="height: 36px;" onclick="loadHistory(false)"><i data-lucide="refresh-cw"></i> 重整</button>
             </div>
           </div>
           <div class="card" style="background: transparent; border: none; padding: 0;">
@@ -482,6 +482,10 @@
     function initGlobalSelectionsFromDraft() {
         const draft = appStore.get('activeQuoteForm');
         if (draft) {
+            if (draft._rowId && draft.projectId) {
+                const titleEl = document.getElementById('quote-view-title');
+                if(titleEl) titleEl.innerText = `客戶建檔報價 (編輯模式 - ${draft.projectId})`;
+            }
             if(draft.quotes) draft.quotes.forEach(q => globalSelections.quote[q.rowId] = { checked: true, price: Number(q.price), month: Number(q.month) });
             if(draft.costs) draft.costs.forEach(c => globalSelections.cost[c.rowId] = { checked: true, price: Number(c.price), month: Number(c.month) });
             
@@ -667,12 +671,15 @@
       globalSelections.cost = {};
       appStore.set('activeQuoteForm', null);
       
+      const titleEl = document.getElementById('quote-view-title');
+      if (titleEl) titleEl.innerText = '客戶建檔報價';
+      
       renderSelectionLists();
       calculateTotals();
       showToast('表單與草稿已完全清空', 'success');
     }
 
-    // ★ 終極版面重構：嚴格對齊截圖的表格化 A4 模板 (包含新增的「聯絡人」)
+    // ★ 終極版面重構：嚴格對齊截圖的表格化 A4 模板
     function buildA4Template(data) {
       let quoteItemsHtml = '';
       data.quotes.forEach(q => {
@@ -696,7 +703,6 @@
 
       let partyASignHtml = '';
       if (data.clientSignatureImg) {
-         // ★ 簽名圖片放大 2 倍 (width: 250px)，採用絕對定位突破表格高度限制
          partyASignHtml = `
            <div style="position: absolute; right: 10px; bottom: 10px;">
               <img src="${data.clientSignatureImg}" style="width: 250px; height: auto; object-fit: contain; transform-origin: bottom right;">
@@ -711,11 +717,9 @@
           
           <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px;">
              <div style="flex: 1;"></div>
-             <!-- ★ Logo 放大 1.5 倍 -->
              <div style="flex: 1; text-align: center;">
                 <img src="${logoUrl}" alt="露比設計" style="max-height: 105px; object-fit: contain;">
              </div>
-             <!-- ★ 右上角單號嚴格靠右對齊 -->
              <div style="flex: 1; text-align: right; font-size: 13px; color: #666; font-family: monospace; padding-bottom: 8px;">單號：${pId}</div>
           </div>
           
@@ -1333,11 +1337,15 @@
 
     // ★ 同步包含客戶端資料的暫存
     function updateDraftFromGlobals() {
-      const draft = appStore.get('activeQuoteForm') || { quotes: [], costs: [], client: {}, discount: 0, terms: '' };
+      const currentDraft = appStore.get('activeQuoteForm') || {};
+      const draft = {
+        _rowId: currentDraft._rowId || null,
+        projectId: currentDraft.projectId || null,
+        quotes: [], costs: [], client: {}, discount: 0, terms: ''
+      };
       const quoteList = appStore.get('quoteSetupList');
       const costList = appStore.get('costSetupList');
 
-      draft.quotes = []; draft.costs = [];
       Object.keys(globalSelections.quote).forEach(rowId => {
           const item = quoteList.find(i => String(i._rowId) === String(rowId));
           if(item) draft.quotes.push({ rowId: rowId, name: item["服務項目"], price: globalSelections.quote[rowId].price, month: globalSelections.quote[rowId].month });
@@ -1390,6 +1398,7 @@
     async function saveQuote(status) {
       calculateTotals(); 
       const payload = {
+         _rowId: appStore.state.activeQuoteForm?._rowId || null,
          client: { taxId: document.getElementById('client-taxid').value, company: document.getElementById('client-company').value, rep: document.getElementById('client-rep').value, contact: document.getElementById('client-contact').value, phone: document.getElementById('client-phone').value, email: document.getElementById('client-email').value, address: document.getElementById('client-address').value },
          our: { company: document.getElementById('our-company').value, taxId: document.getElementById('our-taxid').value, rep: document.getElementById('our-rep').value, contact: document.getElementById('our-contact').value, phone: document.getElementById('our-phone').value, email: document.getElementById('our-email').value, address: document.getElementById('our-address').value },
          quotes: [], costs: [],
@@ -1430,10 +1439,12 @@
 
       try {
         document.getElementById('btn-save-draft').disabled = true; document.getElementById('btn-save-final').disabled = true;
-        const result = await optimisticExecute('saveQuote', payload, () => { showToast(status === 'draft' ? '草稿雲端儲存中...' : '報價產出中...', 'info'); });
-        showToast(status === 'draft' ? '雲端草稿已儲存' : '報價單已成功建立', 'success');
+        const result = await optimisticExecute('saveQuote', payload, () => { showToast(status === 'draft' ? '草稿雲端儲存中...' : '報價單更新/產出中...', 'info'); });
+        showToast(status === 'draft' ? '雲端草稿已儲存' : (payload._rowId ? '歷史報價單已成功更新' : '報價單已成功建立'), 'success');
         
         if (status === 'quoted') {
+           appStore.set('activeQuoteForm', null);
+           document.getElementById('quote-view-title').innerText = '客戶建檔報價';
            appStore.set('currentView', 'history');
            appStore.set('expandProjectIdAfterLoad', result.data.projectId); 
         }
@@ -1474,7 +1485,8 @@
              tax: document.getElementById('dash-tax').innerText, total: document.getElementById('dash-total').innerText
           },
           terms: document.getElementById('quote-terms').value || '',
-          dateStr: new Date().toLocaleDateString('zh-TW')
+          dateStr: new Date().toLocaleDateString('zh-TW'),
+          projectId: (appStore.state.activeQuoteForm && appStore.state.activeQuoteForm.projectId) ? appStore.state.activeQuoteForm.projectId : null
       };
 
       const html = buildA4Template(a4Data);
@@ -1555,20 +1567,25 @@
                 docType: '正式報價單'
             });
             showToast('正式報價單 PDF 產出並儲存成功！', 'success');
-            await loadHistory(); 
+            await loadHistory(true); 
         } catch (e) {
             showToast(`產製失敗：${e.message}`, 'error');
             btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons();
         }
     }
 
-    async function loadHistory() {
+    async function loadHistory(isSilent = false) {
       try {
         const container = document.getElementById('history-list-container');
-        if(container) container.innerHTML = `<div class="skeleton" style="height: 120px; border-radius: 8px; margin-bottom: 12px; width: 100%;"></div>`;
+        const currentList = appStore.get('historyList');
+        if (!isSilent && (!currentList || currentList.length === 0)) {
+          if (container) container.innerHTML = `<div class="skeleton" style="height: 120px; border-radius: 8px; margin-bottom: 12px; width: 100%;"></div>`;
+        }
         const result = await apiCall('getHistory');
         appStore.set('historyList', result.data || []);
-      } catch (e) { showToast('載入歷史紀錄失敗', 'error'); }
+      } catch (e) { 
+        if (!isSilent) showToast('載入歷史紀錄失敗', 'error'); 
+      }
     }
 
     function renderHistoryList() {
@@ -1579,35 +1596,75 @@
       const filteredList = filter === 'ALL' ? list : list.filter(item => item["專案狀態"] === filter);
       if (filteredList.length === 0) { if(container) container.innerHTML = `<p style="color: var(--text-sub); text-align: center; padding: 24px 0;">沒有符合條件的紀錄</p>`; return; }
 
+      const projectGroups = {};
+      filteredList.forEach(item => {
+        const pId = item["專案編號"] || `TEMP-${item._rowId}`;
+        if (!projectGroups[pId]) projectGroups[pId] = [];
+        projectGroups[pId].push(item);
+      });
+
       let html = '';
       let expandRowId = null;
-      const targetExpandId = appStore.get('expandProjectIdAfterLoad'); 
+      const targetExpandId = appStore.get('expandProjectIdAfterLoad');
 
-      filteredList.forEach((item) => {
-        const rowId = item._rowId;
-        if (targetExpandId && item["專案編號"] === targetExpandId) expandRowId = rowId;
+      Object.keys(projectGroups).forEach(pId => {
+        const versions = projectGroups[pId];
+        const latest = versions[0];
+        const rowId = latest._rowId;
+        if (targetExpandId && latest["專案編號"] === targetExpandId) expandRowId = rowId;
 
-        const status = item["專案狀態"] || "未知";
+        const status = latest["專案狀態"] || "未知";
         let badgeClass = "badge-draft";
-        if (status === "已報價") badgeClass = "badge-quoted"; else if (status === "已簽約") badgeClass = "badge-signed"; else if (status === "已請款") badgeClass = "badge-invoiced";
+        if (status === "已報價") badgeClass = "badge-quoted"; 
+        else if (status === "已簽約") badgeClass = "badge-signed"; 
+        else if (status === "已請款") badgeClass = "badge-invoiced";
+
+        let pastVersionsHtml = '';
+        if (versions.length > 1) {
+          pastVersionsHtml = `
+            <div style="margin-top: 16px; border-top: 1px dashed var(--border-light); padding-top: 12px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; cursor:pointer; padding: 6px 0;" onclick="toggleAccordion('hist-subvers-${latest._rowId}')">
+                <span style="font-size: 13px; font-weight: 600; color: var(--text-sub);">
+                  <i data-lucide="layers" style="width:14px;height:14px;display:inline-block;vertical-align:middle;margin-right:4px;"></i> 查看歷史版本變更 (共 ${versions.length - 1} 筆歷史紀錄)
+                </span>
+                <i data-lucide="chevron-down" class="accordion-icon" style="width:16px;height:16px;"></i>
+              </div>
+              <div class="accordion-content" id="hist-subvers-${latest._rowId}" style="background: transparent; padding-top: 8px;">`;
+          
+          for (let v = 1; v < versions.length; v++) {
+            const vItem = versions[v];
+            pastVersionsHtml += `
+              <div style="background: #FFF; border: 1px solid var(--border-light); border-radius: 6px; padding: 10px 14px; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center; font-size:12px;">
+                <div>
+                  <span class="badge badge-draft" style="font-size:10px; margin-right:6px;">第 ${versions.length - v} 版</span>
+                  <span style="font-weight:600;">$${Number(vItem["原價總計"]||0).toLocaleString()}</span>
+                  <span style="color:var(--text-mute); margin-left:8px;">${vItem["簽約時間"] || "未簽約"}</span>
+                </div>
+                <button class="btn-secondary btn-sm" style="height:26px; padding:0 8px; font-size:11px;" onclick="reloadQuote(${vItem._rowId})">載入此版</button>
+              </div>`;
+          }
+          pastVersionsHtml += `</div></div>`;
+        }
 
         html += `
           <div class="accordion-item" id="hist-acc-${rowId}" style="margin-bottom: 12px;">
             <div class="accordion-header" onclick="toggleHistoryAccordion(${rowId})">
               <div style="display:flex; flex-direction:column; gap:4px; width: 100%;">
                  <div style="display:flex; justify-content:space-between; align-items:center;">
-                   <div style="display:flex; align-items:center; gap:8px;">
-                     <span style="font-family: monospace; font-size: 13px; color: var(--text-sub);">${item["專案編號"] || "無編號"}</span>
-                     <span class="badge ${badgeClass}">${status}</span>
-                   </div>
-                   <i data-lucide="chevron-down" class="accordion-icon"></i>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                      <span style="font-family: monospace; font-size: 13px; color: var(--text-sub);">${latest["專案編號"] || "無編號"}</span>
+                      <span class="badge ${badgeClass}">${status}</span>
+                      ${versions.length > 1 ? `<span class="badge" style="background:#ECEFF1;color:#455A64;font-size:10px;">最新版 (共${versions.length}版)</span>` : ''}
+                    </div>
+                    <i data-lucide="chevron-down" class="accordion-icon"></i>
                  </div>
-                 <div style="font-weight: 600; font-size: 16px;">${item["公司名稱"] || "未知客戶"}</div>
-                 <div style="color: var(--text-sub); font-size: 13px;">總計：$${Number(item["原價總計"] || 0).toLocaleString()} | 簽約：${item["簽約時間"] ? new Date(item["簽約時間"]).toLocaleDateString('zh-TW') : "未簽約"}</div>
+                 <div style="font-weight: 600; font-size: 16px;">${latest["公司名稱"] || "未知客戶"}</div>
+                 <div style="color: var(--text-sub); font-size: 13px;">總計：$${Number(latest["原價總計"] || 0).toLocaleString()} | 簽約：${latest["簽約時間"] ? new Date(latest["簽約時間"]).toLocaleDateString('zh-TW') : "未簽約"}</div>
               </div>
             </div>
             <div class="accordion-content" id="hist-content-${rowId}">
             </div>
+            ${pastVersionsHtml}
           </div>`;
       });
       
@@ -1641,7 +1698,7 @@
 
       if (docs.length === 0) {
           if (history["請款單PDF網址"]) docs.push({ type: '歷史請款單', name: '請款單 (舊版紀錄)', url: history["請款單PDF網址"] });
-          if (history["簽約合約PDF網址"]) docs.push({ type: '歷史合約', name: '已簽署合約 (舊版紀錄)', url: history["簽約合約PDF網址"] });
+          if (history["簽約檔案PDF"] || history["簽約合約PDF網址"]) docs.push({ type: '歷史合約', name: '已簽署合約 (舊版紀錄)', url: history["簽約檔案PDF"] || history["簽約合約PDF網址"] });
       }
 
       if (docs.length > 0) {
@@ -1682,13 +1739,13 @@
       }
 
       if (status === '已報價') {
-         const baseUrl = (typeof EXTERNAL_FRONTEND_URL !== 'undefined' && EXTERNAL_FRONTEND_URL.trim() !== "") ? EXTERNAL_FRONTEND_URL : GAS_WEB_URL;
-         const signUrl = baseUrl.includes('?') ? `${baseUrl}&p=sign&id=${history["專案編號"]}` : `${baseUrl}?p=sign&id=${history["專案編號"]}`;
-         
-         const clientName = history["公司名稱"];
-         const defaultSubject = `【報價單】露比設計-${clientName} 專案合約線上簽署`;
+          const baseUrl = (typeof EXTERNAL_FRONTEND_URL !== 'undefined' && EXTERNAL_FRONTEND_URL.trim() !== "") ? EXTERNAL_FRONTEND_URL : GAS_WEB_URL;
+          const signUrl = baseUrl.includes('?') ? `${baseUrl}&p=sign&id=${history["專案編號"]}` : `${baseUrl}?p=sign&id=${history["專案編號"]}`;
+          
+          const clientName = history["公司名稱"];
+          const defaultSubject = `【報價單】露比設計-${clientName} 專案合約線上簽署`;
 
-         actionsHtml = `
+          actionsHtml = `
             <div style="margin-top: 8px;">
                <div style="display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px;">
                   <button class="btn-primary btn-sm" id="btn-gen-quote-hist-${rowId}" onclick="generateQuotePdfFromHistory(${rowId})">
@@ -1736,10 +1793,16 @@
             </div>`;
 
       } else if (status === '已簽約' || status === '已請款') {
-         const companyName = history["公司名稱"];
-         
-         actionsHtml = `
+          const companyName = history["公司名稱"];
+          
+          actionsHtml = `
             <div style="margin-top: 16px;">
+               <div style="display:flex; justify-content:flex-end; margin-bottom:12px;">
+                  <button class="btn-secondary btn-sm" onclick="reloadQuote(${rowId})">
+                     <i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯
+                  </button>
+               </div>
+               
                ${vaultHtml}
 
                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:12px; background:var(--bg-hover); padding:12px; border-radius:8px; border:1px solid var(--border-light);">
@@ -1785,7 +1848,7 @@
                </div>
             </div>`;
       } else {
-         actionsHtml = `
+          actionsHtml = `
             ${vaultHtml}
             <div style="text-align:right; margin-top:16px;">
                <button class="btn-secondary" onclick="reloadQuote(${rowId})"><i data-lucide="edit-3" style="width:14px;height:14px;"></i> 載入回報價表單重新編輯</button>
@@ -1795,7 +1858,7 @@
       contentDiv.innerHTML = actionsHtml;
       
       if (status === '已簽約' || status === '已請款') {
-         updateHistoryPreviewHtml(rowId);
+          updateHistoryPreviewHtml(rowId);
       }
       lucide.createIcons();
     }
@@ -1824,8 +1887,15 @@
     function reloadQuote(rowId) {
       const history = appStore.get('historyList').find(h => h._rowId === rowId);
       if (!history) return;
-      document.getElementById('client-taxid').value = history["統一編號"] || ""; document.getElementById('client-company').value = history["公司名稱"] || ""; document.getElementById('client-rep').value = history["代表人"] || ""; document.getElementById('client-contact').value = history["業務聯絡人"] || ""; document.getElementById('client-phone').value = history["聯繫電話"] || ""; document.getElementById('client-email').value = history["電子信箱"] || ""; document.getElementById('client-address').value = history["公司地址"] || "";
-      document.getElementById('quote-discount').value = history["專案優惠價"] || 0; document.getElementById('quote-terms').value = history["約定條款"] || "";
+      document.getElementById('client-taxid').value = history["統一編號"] || ""; 
+      document.getElementById('client-company').value = history["公司名稱"] || ""; 
+      document.getElementById('client-rep').value = history["代表人"] || ""; 
+      document.getElementById('client-contact').value = history["業務聯絡人"] || ""; 
+      document.getElementById('client-phone').value = history["聯繫電話"] || ""; 
+      document.getElementById('client-email').value = history["電子信箱"] || ""; 
+      document.getElementById('client-address').value = history["公司地址"] || "";
+      document.getElementById('quote-discount').value = history["專案優惠價"] || 0; 
+      document.getElementById('quote-terms').value = history["約定條款"] || "";
       
       globalSelections.quote = {};
       globalSelections.cost = {};
@@ -1838,11 +1908,31 @@
 
       renderSelectionLists();
       calculateTotals();
+
+      appStore.set('activeQuoteForm', {
+        _rowId: rowId,
+        projectId: history["專案編號"],
+        client: {
+          taxId: history["統一編號"] || "",
+          company: history["公司名稱"] || "",
+          rep: history["代表人"] || "",
+          contact: history["業務聯絡人"] || "",
+          phone: history["聯繫電話"] || "",
+          email: history["電子信箱"] || "",
+          address: history["公司地址"] || ""
+        },
+        discount: history["專案優惠價"] || 0,
+        terms: history["約定條款"] || ""
+      });
+
+      const titleEl = document.getElementById('quote-view-title');
+      if (titleEl) titleEl.innerText = `客戶建檔報價 (編輯模式 - ${history["專案編號"]})`;
+
       appStore.set('currentView', 'quote'); 
-      showToast('草稿已成功載入', 'success');
+      showToast('草稿已成功載入 (進入原列更新模式)', 'success');
     }
 
-    // ★ 重構請款單 A4 模板與報價單對齊一致的企業級排版
+    // ★ 重構請款單 A4 模板
     function generateInvoiceA4HtmlString(item, invoiceType = '1') {
       let ratio = 1.0;
       let titlePrefix = "專案請款單";
@@ -1879,11 +1969,9 @@
           
           <div style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 24px;">
              <div style="flex: 1;"></div>
-             <!-- ★ Logo 放大 1.5 倍 -->
              <div style="flex: 1; text-align: center;">
                 <img src="${logoUrl}" alt="露比設計" style="max-height: 105px; object-fit: contain;">
              </div>
-             <!-- ★ 右上角單號嚴格靠右對齊 -->
              <div style="flex: 1; text-align: right; font-size: 13px; color: #666; font-family: monospace; padding-bottom: 8px;">單號：${item["專案編號"] || ''}</div>
           </div>
 
@@ -1968,7 +2056,7 @@
         
         showToast('請款單產出成功！', 'success');
         
-        await loadHistory();
+        await loadHistory(true);
       } catch (e) { showToast(`產製失敗：${e.message}`, 'error'); }
       finally { 
         if(btn) { btn.innerHTML = originalText; btn.disabled = false; lucide.createIcons(); }
@@ -2108,7 +2196,10 @@
         document.querySelectorAll('.nav-item').forEach(btn => { if (btn.dataset.view === data.value) btn.classList.add('active'); else btn.classList.remove('active'); });
         document.querySelectorAll('.view-section').forEach(section => { if (section.id === `view-${data.value}`) section.classList.add('active'); else section.classList.remove('active'); });
         lucide.createIcons();
-        if (data.value === 'history' && PAGE_MODE !== 'ONLINE_SIGN') loadHistory();
+        if (data.value === 'history' && PAGE_MODE !== 'ONLINE_SIGN') {
+          renderHistoryList();
+          loadHistory(true);
+        }
       }
       if (data.key === 'setupActiveTab') {
         const filterKey = data.value === 'quote' ? 'setupQuoteFilters' : 'setupCostFilters';
@@ -2136,14 +2227,14 @@
       } else { 
         appStore.set('currentView', 'setup'); 
         loadSetupItems(); 
+        loadHistory(true);
       }
     };
 
     document.addEventListener("visibilitychange", () => {
       if (document.visibilityState === "visible") {
         if (appStore.get('currentView') === 'history' && PAGE_MODE !== 'ONLINE_SIGN') {
-          console.log("偵測到視窗切換，自動重整歷史紀錄...");
-          loadHistory(); 
+          loadHistory(true); 
         }
       }
     });
